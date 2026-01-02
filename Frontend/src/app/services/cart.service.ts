@@ -1,0 +1,558 @@
+// src/app/services/cart.service.ts
+import { Injectable, Inject, PLATFORM_ID, OnDestroy } from '@angular/core';
+import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
+import { map, catchError, distinctUntilChanged, takeUntil, tap, skip } from 'rxjs/operators';
+import { HttpClient } from '@angular/common/http';
+import { HttpHeaders } from '@angular/common/http';
+import { isPlatformBrowser } from '@angular/common';
+import { Product } from '../models/product.model';
+import { CartItem } from '../models/cart-item.model';
+import { AuthService } from './auth.service';
+
+interface CartOperationResult {
+  success: boolean;
+  message?: string;
+}
+
+@Injectable({
+  providedIn: 'root'
+})
+export class CartService implements OnDestroy {
+  // Observables
+  private cartItems$ = new BehaviorSubject<CartItem[]>([]);
+  private destroy$ = new Subject<void>();
+
+  // Configuración
+  private readonly API_URL = 'http://localhost:8000/api';
+  private readonly STORAGE_KEY = 'cart';
+  private readonly MAX_ITEMS_GUEST = 2;
+  private readonly MAX_QUANTITY_PER_ITEM = 10;
+
+  // Estado para prevenir bucles
+  private isInitialized = false;
+  private isSyncing = false;
+  private isLoadingFromAPI = false;
+
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {
+    this.initializeCart();
+    this.setupAuthListener();
+  }
+
+  private getHttpOptions(): { headers?: HttpHeaders } {
+    const headersObj = this.authService.getAuthHeaders ? this.authService.getAuthHeaders() : {};
+    const headers = new HttpHeaders(headersObj as { [name: string]: string });
+    return headers.keys().length ? { headers } : {};
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  // ==================== INICIALIZACIÓN ====================
+
+  private initializeCart(): void {
+    if (this.isInitialized) {
+      console.log('⚠️ CartService ya inicializado, abortando...');
+      return;
+    }
+
+    console.log('🚀 Inicializando CartService...');
+    
+    // Cargar inmediatamente desde localStorage (sincrónico, rápido)
+    this.loadFromLocalStorage();
+
+    // Si está autenticado, cargar desde API (asincrónico, en background)
+    if (this.authService.isLoggedIn()) {
+      console.log('✅ Usuario autenticado en inicialización, cargando desde API...');
+      this.loadFromAPI();
+    }
+
+    this.isInitialized = true;
+  }
+
+  private setupAuthListener(): void {
+    console.log('👂 Configurando listener de autenticación...');
+
+    this.authService.isAuthenticated$
+      .pipe(
+        distinctUntilChanged(), // Solo emitir cuando cambie realmente
+        skip(1), // ⚠️ CRÍTICO: Saltar la primera emisión (valor inicial)
+        tap(isAuth => console.log('🔔 Cambio de autenticación detectado:', isAuth)),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(isAuthenticated => {
+        this.handleAuthChange(isAuthenticated);
+      });
+  }
+
+  private handleAuthChange(isAuthenticated: boolean): void {
+    if (this.isSyncing) {
+      console.log('⏸️ Sincronización en curso, ignorando cambio de auth...');
+      return;
+    }
+
+    if (isAuthenticated) {
+      console.log('🔑 Login detectado - Sincronizando carrito local con API...');
+      this.syncLocalCartWithAPI();
+    } else {
+      console.log('🚪 Logout detectado - Manteniendo carrito en localStorage');
+      // Al cerrar sesión, el carrito permanece en localStorage
+      // No hacemos nada aquí, el carrito local ya está cargado
+    }
+  }
+
+  // ==================== CARGA DE DATOS ====================
+
+  private loadFromAPI(): void {
+    if (this.isLoadingFromAPI) {
+      console.log('⏸️ Ya hay una carga desde API en curso...');
+      return;
+    }
+
+    this.isLoadingFromAPI = true;
+    console.log('📥 Cargando carrito desde API...');
+
+    const options = this.getHttpOptions();
+    this.http.get<any>(`${this.API_URL}/cart`, options)
+      .pipe(
+        catchError(error => {
+          console.error('❌ Error cargando desde API:', error);
+          // Mantener el carrito local si falla la API
+          return of({ success: false, cart_items: [] });
+        }),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(response => {
+        this.isLoadingFromAPI = false;
+        
+        const items = this.parseAPIResponse(response);
+        console.log('✅ Carrito API cargado:', items.length, 'items');
+        
+        // Solo actualizar si hay items o si el carrito está vacío
+        if (items.length > 0 || this.cartItems$.value.length === 0) {
+          this.updateCart(items);
+        } else {
+          console.log('ℹ️ Carrito API vacío, manteniendo carrito local');
+        }
+      });
+  }
+
+  private loadFromLocalStorage(): void {
+    const items = this.getLocalCart();
+    console.log('💾 Carrito local cargado:', items.length, 'items');
+    
+    // Solo emitir si hay cambios reales
+    const currentItems = this.cartItems$.value;
+    if (JSON.stringify(currentItems) !== JSON.stringify(items)) {
+      this.cartItems$.next(items);
+    }
+  }
+
+  private syncLocalCartWithAPI(): void {
+    if (this.isSyncing) {
+      console.log('⏸️ Sincronización ya en curso, abortando...');
+      return;
+    }
+    
+    this.isSyncing = true;
+    const localItems = this.getLocalCart();
+
+    // Si no hay items locales, solo cargar desde API
+    if (localItems.length === 0) {
+      console.log('📭 Carrito local vacío, cargando desde API...');
+      this.isSyncing = false;
+      this.loadFromAPI();
+      return;
+    }
+
+    console.log('🔄 Sincronizando', localItems.length, 'items locales con API...');
+
+    const payload = {
+      local_cart: localItems.map(item => ({
+        product_id: item.product.id,
+        quantity: item.quantity
+      }))
+    };
+
+    console.log('📤 Payload sincronización carrito:', payload);
+    const options = this.getHttpOptions();
+
+    this.http.post(`${this.API_URL}/cart/sync`, payload, options)
+      .pipe(
+        catchError(error => {
+          console.error('❌ Error en sincronización:', error);
+          this.isSyncing = false;
+          // Si falla la sincronización, mantener el carrito local
+          return of(null);
+        }),
+        takeUntil(this.destroy$)
+      )
+      .subscribe({
+        next: (response) => {
+          console.log('✅ Sincronización completada:', response);
+          this.isSyncing = false;
+          // Cargar el carrito combinado desde la API
+          this.loadFromAPI();
+        },
+        error: () => {
+          this.isSyncing = false;
+        }
+      });
+  }
+
+  // ==================== OPERACIONES CRUD ====================
+
+  addToCart(product: Product, quantity: number = 1): CartOperationResult {
+    if (quantity <= 0) {
+      return { success: false, message: 'La cantidad debe ser mayor a 0' };
+    }
+
+    // Validar límites para invitados
+    if (!this.authService.isLoggedIn()) {
+      const validation = this.validateGuestLimits(product.id, quantity);
+      if (!validation.success) {
+        return validation;
+      }
+    }
+
+    const currentItems = this.cartItems$.value;
+    const existingItem = currentItems.find(item => item.product.id === product.id);
+
+    if (existingItem) {
+      return this.updateQuantity(product.id, existingItem.quantity + quantity);
+    }
+
+    return this.addNewItem(product, quantity);
+  }
+
+  private addNewItem(product: Product, quantity: number): CartOperationResult {
+    const newItem: CartItem = {
+      id: Date.now(),
+      product,
+      quantity,
+      price: product.price
+    };
+
+    if (this.authService.isLoggedIn()) {
+      this.addItemToAPI(newItem);
+    } else {
+      const updatedItems = [...this.cartItems$.value, newItem];
+      this.updateCart(updatedItems);
+    }
+
+    return { success: true, message: '✅ Producto agregado al carrito' };
+  }
+
+  private addItemToAPI(item: CartItem): void {
+    console.log('➕ Agregando a API:', item.product.id);
+    const options = this.getHttpOptions();
+    const body = { product_id: item.product.id, quantity: item.quantity };
+    console.log('📤 Agregar item a API payload:', body);
+
+    this.http.post(`${this.API_URL}/cart`, body, options)
+      .pipe(
+        catchError(error => {
+          console.error('❌ Error agregando a API, usando localStorage:', error);
+          // Si falla la API, agregar localmente
+          const updatedItems = [...this.cartItems$.value, item];
+          this.updateCart(updatedItems);
+          return of(null);
+        }),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(response => {
+        if (response) {
+          console.log('✅ Item agregado a API, recargando carrito...');
+          this.loadFromAPI();
+        }
+      });
+  }
+
+  updateQuantity(productId: number, quantity: number): CartOperationResult {
+    if (quantity <= 0) {
+      this.removeFromCart(productId);
+      return { success: true, message: 'Producto eliminado del carrito' };
+    }
+
+    // Validar límites
+    if (!this.authService.isLoggedIn()) {
+      const validation = this.validateGuestQuantityUpdate(productId, quantity);
+      if (!validation.success) {
+        return validation;
+      }
+    }
+
+    const maxQuantity = this.authService.isLoggedIn() 
+      ? this.MAX_QUANTITY_PER_ITEM 
+      : this.MAX_ITEMS_GUEST;
+
+    const finalQuantity = Math.min(quantity, maxQuantity);
+
+    if (this.authService.isLoggedIn()) {
+      this.updateQuantityInAPI(productId, finalQuantity);
+    } else {
+      this.updateQuantityLocally(productId, finalQuantity);
+    }
+
+    return { success: true, message: 'Cantidad actualizada' };
+  }
+
+  private updateQuantityInAPI(productId: number, quantity: number): void {
+    console.log('✏️ Actualizando cantidad en API:', productId, '→', quantity);
+    const options = this.getHttpOptions();
+
+    this.http.put(`${this.API_URL}/cart/${productId}`, { quantity }, options)
+      .pipe(
+        catchError(error => {
+          console.error('❌ Error actualizando API:', error);
+          this.updateQuantityLocally(productId, quantity);
+          return of(null);
+        }),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(response => {
+        if (response) {
+          this.loadFromAPI();
+        }
+      });
+  }
+
+  private updateQuantityLocally(productId: number, quantity: number): void {
+    const currentItems = this.cartItems$.value;
+    const updatedItems = currentItems.map(item =>
+      item.product.id === productId ? { ...item, quantity } : item
+    );
+    this.updateCart(updatedItems);
+  }
+
+  removeFromCart(productId: number): void {
+    console.log('🗑️ Eliminando producto:', productId);
+
+    if (this.authService.isLoggedIn()) {
+      this.removeFromAPI(productId);
+    } else {
+      this.removeLocally(productId);
+    }
+  }
+
+  private removeFromAPI(productId: number): void {
+    const options = this.getHttpOptions();
+    this.http.delete(`${this.API_URL}/cart/${productId}`, options)
+      .pipe(
+        catchError(error => {
+          console.error('❌ Error eliminando de API:', error);
+          this.removeLocally(productId);
+          return of(null);
+        }),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(response => {
+        if (response !== null) {
+          this.loadFromAPI();
+        }
+      });
+  }
+
+  private removeLocally(productId: number): void {
+    const updatedItems = this.cartItems$.value.filter(
+      item => item.product.id !== productId
+    );
+    this.updateCart(updatedItems);
+  }
+
+  clearCart(): void {
+    console.log('🧹 Vaciando carrito...');
+
+    if (this.authService.isLoggedIn()) {
+      const options = this.getHttpOptions();
+      this.http.delete(`${this.API_URL}/cart`, options)
+        .pipe(
+          catchError(error => {
+            console.error('❌ Error limpiando API:', error);
+            return of(null);
+          }),
+          takeUntil(this.destroy$)
+        )
+        .subscribe(() => {
+          this.updateCart([]);
+        });
+    } else {
+      this.updateCart([]);
+    }
+  }
+
+  // ==================== VALIDACIONES ====================
+
+  private validateGuestLimits(productId: number, quantity: number): CartOperationResult {
+    const currentItems = this.cartItems$.value;
+    const existingItem = currentItems.find(item => item.product.id === productId);
+
+    // Si es un producto nuevo y ya alcanzamos el límite de productos diferentes
+    if (!existingItem && currentItems.length >= this.MAX_ITEMS_GUEST) {
+      return {
+        success: false,
+        message: `❌ Los invitados pueden agregar máximo ${this.MAX_ITEMS_GUEST} productos diferentes. Inicia sesión para más.`
+      };
+    }
+
+    // Validar total de items
+    const currentTotal = currentItems.reduce((sum, item) => sum + item.quantity, 0);
+    const newTotal = existingItem 
+      ? currentTotal + quantity 
+      : currentTotal + quantity;
+
+    if (newTotal > this.MAX_ITEMS_GUEST) {
+      const available = this.MAX_ITEMS_GUEST - currentTotal;
+      return {
+        success: false,
+        message: `❌ Solo puedes agregar ${available} items más. Límite de invitados: ${this.MAX_ITEMS_GUEST} items totales.`
+      };
+    }
+
+    return { success: true };
+  }
+
+  private validateGuestQuantityUpdate(productId: number, newQuantity: number): CartOperationResult {
+    const currentItems = this.cartItems$.value;
+    const otherItemsTotal = currentItems
+      .filter(item => item.product.id !== productId)
+      .reduce((sum, item) => sum + item.quantity, 0);
+
+    const newTotal = otherItemsTotal + newQuantity;
+
+    if (newTotal > this.MAX_ITEMS_GUEST) {
+      const maxAllowed = this.MAX_ITEMS_GUEST - otherItemsTotal;
+      return {
+        success: false,
+        message: `❌ Cantidad máxima permitida: ${maxAllowed}. Límite total: ${this.MAX_ITEMS_GUEST} items.`
+      };
+    }
+
+    return { success: true };
+  }
+
+  // ==================== UTILIDADES ====================
+
+  private updateCart(items: CartItem[]): void {
+    // Solo actualizar si hay cambios reales
+    const currentItems = this.cartItems$.value;
+    if (JSON.stringify(currentItems) !== JSON.stringify(items)) {
+      this.cartItems$.next(items);
+      this.saveToLocalStorage(items);
+    }
+  }
+
+  private getLocalCart(): CartItem[] {
+    if (!isPlatformBrowser(this.platformId)) {
+      return [];
+    }
+
+    try {
+      const stored = localStorage.getItem(this.STORAGE_KEY);
+      return stored ? JSON.parse(stored) : [];
+    } catch (error) {
+      console.error('❌ Error leyendo localStorage:', error);
+      localStorage.removeItem(this.STORAGE_KEY);
+      return [];
+    }
+  }
+
+  private saveToLocalStorage(items: CartItem[]): void {
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(items));
+      console.log('💾 Guardado en localStorage:', items.length, 'items');
+    }
+  }
+
+  private parseAPIResponse(response: any): CartItem[] {
+    if (!response?.success || !response?.cart_items) {
+      return [];
+    }
+
+    return response.cart_items.map((apiItem: any) => ({
+      id: apiItem.id,
+      product: apiItem.product,
+      quantity: apiItem.quantity,
+      price: apiItem.product.price
+    }));
+  }
+
+  // ==================== API PÚBLICA ====================
+
+  getCartItems(): Observable<CartItem[]> {
+    return this.cartItems$.asObservable();
+  }
+
+  getCurrentItems(): CartItem[] {
+    return this.cartItems$.value;
+  }
+
+  getTotalItems(): Observable<number> {
+    return this.cartItems$.pipe(
+      map(items => items.reduce((sum, item) => sum + item.quantity, 0))
+    );
+  }
+
+  getTotalPrice(): Observable<number> {
+    return this.cartItems$.pipe(
+      map(items => items.reduce((sum, item) => 
+        sum + (item.product.price * item.quantity), 0
+      ))
+    );
+  }
+
+  getTotal(): Observable<number> {
+    return this.getTotalPrice();
+  }
+
+  getProductQuantity(productId: number): Observable<number> {
+    return this.cartItems$.pipe(
+      map(items => {
+        const item = items.find(i => i.product.id === productId);
+        return item?.quantity ?? 0;
+      })
+    );
+  }
+
+  isProductInCart(productId: number): Observable<boolean> {
+    return this.cartItems$.pipe(
+      map(items => items.some(item => item.product.id === productId))
+    );
+  }
+
+  hasReachedGuestLimit(): Observable<boolean> {
+    if (this.authService.isLoggedIn()) {
+      return of(false);
+    }
+
+    return this.cartItems$.pipe(
+      map(items => {
+        const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+        return items.length >= this.MAX_ITEMS_GUEST || 
+               totalItems >= this.MAX_ITEMS_GUEST;
+      })
+    );
+  }
+
+  getGuestLimitMessage(): string {
+    const currentItems = this.cartItems$.value;
+    const totalProducts = currentItems.length;
+    const totalItems = currentItems.reduce((sum, item) => sum + item.quantity, 0);
+
+    if (totalProducts >= this.MAX_ITEMS_GUEST) {
+      return `Límite alcanzado: máximo ${this.MAX_ITEMS_GUEST} productos diferentes. Inicia sesión para más.`;
+    }
+
+    if (totalItems >= this.MAX_ITEMS_GUEST) {
+      return `Límite alcanzado: máximo ${this.MAX_ITEMS_GUEST} items totales. Inicia sesión para más.`;
+    }
+
+    const remaining = this.MAX_ITEMS_GUEST - totalItems;
+    return `Como invitado puedes agregar ${remaining} items más. Inicia sesión para límites mayores.`;
+  }
+}

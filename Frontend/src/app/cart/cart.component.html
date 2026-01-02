@@ -1,0 +1,96 @@
+<!-- src/app/cart/cart.component.html -->
+<div class="cart-container">
+    <div class="cart-header">
+        <button (click)="goBack()" class="nav-button back-button">
+            <i class="fas fa-arrow-left"></i> Volver
+        </button>
+        <h1>Bolsa de Compras</h1>
+        <button (click)="clearCart()" class="clear-cart-button" 
+          *ngIf="(cartItems$ | async) && (cartItems$ | async)!.length > 0">
+            Vaciar Bolsa
+        </button>
+    </div>
+
+    <!-- Carrito vacío -->
+    <div *ngIf="(cartItems$ | async) && (cartItems$ | async)!.length === 0" class="empty-cart-message">
+        <div class="empty-cart-icon">
+            <i class="fas fa-shopping-bag"></i>
+        </div>
+        <p>Tu bolsa de compras está vacía.</p>
+        <button (click)="goToShop()" class="back-to-shop-button">
+            Ir a la tienda
+        </button>
+    </div>
+
+    <!-- Carrito con productos -->
+    <div *ngIf="(cartItems$ | async) && (cartItems$ | async)!.length > 0" class="cart-content">
+        <div class="cart-items-list">
+            <div *ngFor="let item of cartItems$ | async" class="cart-item">
+                <img 
+                    [src]="getProductImage(item.product)" 
+                    [alt]="item.product.name" 
+                    class="cart-item-image"
+                    (error)="handleImageError($event)">
+                
+                <div class="cart-item-details">
+                    <h2 class="cart-item-name">{{ item.product.name }}</h2>
+                    <p class="cart-item-price">{{ item.product.price | currency:'USD':'symbol':'1.2-2' }}</p>
+                    
+                    <!-- Controles de cantidad -->
+                    <div class="quantity-controls">
+                        <button 
+                            (click)="decreaseQuantity(item.product.id, item.quantity)"
+                            [disabled]="item.quantity <= 1"
+                            class="quantity-btn">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <span class="quantity-display">{{ item.quantity }}</span>
+                        <button 
+                            (click)="increaseQuantity(item.product.id, item.quantity)"
+                            [disabled]="item.quantity >= 10"
+                            class="quantity-btn">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+
+                    <p class="item-total">
+                        Subtotal: {{ (item.product.price * item.quantity) | currency:'USD':'symbol':'1.2-2' }}
+                    </p>
+                </div>
+
+                <button (click)="removeItem(item.product.id)" class="remove-item-button" title="Eliminar producto">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="cart-summary">
+            <div class="summary-card">
+                <div class="total-section">
+                    <h3>Resumen del Pedido</h3>
+                    <div class="summary-row">
+                        <span>Productos ({{ totalItems$ | async }})</span>
+                        <span>{{ totalPrice$ | async | currency:'USD':'symbol':'1.2-2' }}</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Envío</span>
+                        <span>Gratis</span>
+                    </div>
+                    <div class="summary-row total">
+                        <strong>Total</strong>
+                        <strong>{{ totalPrice$ | async | currency:'USD':'symbol':'1.2-2' }}</strong>
+                    </div>
+                </div>
+                
+                <div class="cart-actions">
+                    <button (click)="continueShopping()" class="continue-shopping-button">
+                        <i class="fas fa-arrow-left"></i> Seguir Comprando
+                    </button>
+                    <button (click)="checkout()" class="checkout-button">
+                        Proceder al Pago <i class="fas fa-credit-card"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

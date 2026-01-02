@@ -1,0 +1,326 @@
+<header class="hero-section">
+    <div class="floating-shapes">
+        <div class="shape circle"></div>
+        <div class="shape square"></div>
+        <div class="shape triangle"></div>
+    </div>
+    
+    <!-- user-flotante retirado: ahora el usuario está en el Navbar -->
+    <div class="hero-content">
+        <img src="./Logo_estilos_pastel.jpg" alt="Estilos Moda" class="hero-logo">
+        <h1 class="hero-title">Descubre tu estilo único</h1>
+        <p class="hero-subtitle">Las últimas tendencias en moda para hombre, mujer y niños</p>   
+        <a href="#categories" class="hero-cta">Explorar Colecciones</a>
+    </div>
+    
+    <div class="hero-search-wrapper">
+        <div class="search-container">
+            <input 
+                type="search" 
+                placeholder="Buscar productos, marcas, estilos..."
+                class="hero-search-input"
+                [(ngModel)]="searchQuery"
+                (input)="onSearchInput($event)"
+                (keyup.enter)="performQuickSearch()"
+                (focus)="onSearchFocus()"
+                (blur)="onSearchBlur()"
+            >
+            <button 
+                class="search-btn" 
+                (click)="performQuickSearch()" 
+                [disabled]="!searchQuery.trim()"
+            >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
+            </button>
+        </div>
+        
+        <!-- Sugerencias de búsqueda -->
+        <div class="search-suggestions" [class.active]="showSuggestions && searchSuggestions.length > 0">
+            <div 
+                *ngFor="let suggestion of searchSuggestions" 
+                (click)="selectSuggestion(suggestion)"
+                class="suggestion-item"
+            >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
+                <span>{{ suggestion }}</span>
+            </div>
+        </div>
+    </div>
+</header>
+
+<div class="home-page-container">
+    <div class="fixed-image-wrapper">
+    <div class="image-content" [ngClass]="getCurrentCategoryClass()">
+        <h3 class="image-title">{{ fixedImageTitle }}</h3>
+        <img class="dynamic-image" [src]="fixedImageUrl" [alt]="fixedImageTitle">
+        <p class="image-description">{{ fixedImageDescription }}</p>
+    </div>
+</div>
+
+    <div class="main-scrolling-content-area">
+        <!-- Grid de Categorías Responsive -->
+        <section *ngFor="let category of sections; let i = index"
+            class="content-section"
+            [ngClass]="getSafeClassName(category.name)"
+            [style.background-color]="category.color"
+            [style.color]="category.text_color"
+            [attr.data-image]="category.image_url"
+            [attr.data-title]="category.name"
+            [attr.data-description]="category.description_short">
+            <div class="section-decoration"></div>
+            <div class="section-content">
+                <h2>{{ category.name }}</h2>
+                <p>{{ category.description_long }}</p>
+                <button class="view-button" (click)="onViewButtonClick(category, $event)">Ver Colección</button>
+            </div>
+        </section>
+    </div>
+</div>
+<!-- Modal Login -->
+<div class="modal-overlay" [class.active]="showLoginModal" (click)="closeModals()">    
+    <div class="auth-container" (click)="$event.stopPropagation()">
+        <button class="modal-close" (click)="closeModals()">
+            <i class="fas fa-times"></i>
+        </button>
+      <div class="auth-header">
+        <h2 class="auth-title">Iniciar Sesión</h2>
+        <p class="auth-subtitle">Ingresa a tu cuenta para continuar</p>
+      </div>
+
+      <form class="auth-form" (ngSubmit)="onLogin()">
+        <div class="form-group">
+          <label class="form-label" for="login-email">Email</label>
+          <input 
+            type="email" 
+            id="login-email" 
+            placeholder="Tu email" 
+            [(ngModel)]="credentials.email" 
+            name="loginEmail" 
+            class="form-input" 
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="login-password">Contraseña</label>
+          <input 
+            type="password" 
+            id="login-password" 
+            placeholder="Tu contraseña" 
+            [(ngModel)]="credentials.password" 
+            name="loginPassword" 
+            class="form-input" 
+            required
+          >
+        </div>
+
+        <div *ngIf="showLoginError && authErrorMessage" class="error-message show">
+            <i class="fas fa-exclamation-circle"></i>
+            <span>{{ authErrorMessage }}</span>
+            <button class="error-close" (click)="showLoginError = false; authErrorMessage = ''">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <button type="submit" class="auth-button" [disabled]="!credentials.email || !credentials.password">
+          Iniciar Sesión
+        </button>
+
+        <div class="auth-link">
+          <a href="javascript:void(0)" (click)="closeModals(); openRegisterModal()">
+            ¿No tienes una cuenta? Regístrate ahora
+          </a>
+        </div>
+      </form>
+  </div>
+</div>
+
+<!-- Modal Register -->
+<div class="modal-overlay" [class.active]="showRegisterModal" (click)="closeModals()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+       
+    <div class="auth-container">
+        <button class="modal-close" (click)="closeModals()">
+            <i class="fas fa-times"></i>
+        </button>
+      <div class="auth-header">
+        <h2 class="auth-title">Crear Cuenta</h2>
+        <p class="auth-subtitle">Regístrate para comenzar a comprar</p>
+      </div>
+
+      <form class="auth-form" (ngSubmit)="onRegister()">
+        <div class="form-group">
+          <label class="form-label" for="register-name">Nombre</label>
+          <input 
+            type="text" 
+            id="register-name" 
+            placeholder="Tu nombre completo" 
+            [(ngModel)]="registerData.name" 
+            name="registerName" 
+            class="form-input" 
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="register-email">Email</label>
+          <input 
+            type="email" 
+            id="register-email" 
+            placeholder="Tu email" 
+            [(ngModel)]="registerData.email" 
+            name="registerEmail" 
+            class="form-input" 
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="register-password">Contraseña</label>
+          <input 
+            type="password" 
+            id="register-password" 
+            placeholder="Crea una contraseña segura" 
+            [(ngModel)]="registerData.password" 
+            name="registerPassword" 
+            class="form-input" 
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="register-password-confirm">Confirmar Contraseña</label>
+          <input 
+            type="password" 
+            id="register-password-confirm" 
+            placeholder="Repite tu contraseña" 
+            [(ngModel)]="registerData.password_confirmation" 
+            name="registerPasswordConfirm" 
+            class="form-input" 
+            required
+          >
+        </div>
+
+        <div *ngIf="showRegisterError && authErrorMessage" class="error-message show">
+            <i class="fas fa-exclamation-circle"></i>
+            <span>{{ authErrorMessage }}</span>
+            <button class="error-close" (click)="showRegisterError = false; authErrorMessage = ''">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <button type="submit" class="auth-button" 
+                [disabled]="!registerData.name || !registerData.email || !registerData.password || !registerData.password_confirmation">
+          Crear Cuenta
+        </button>
+
+        <div class="auth-link">
+          <a href="javascript:void(0)" (click)="closeModals(); openLoginModal()">
+            ¿Ya tienes una cuenta? Inicia sesión
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<!-- Sección de Productos Destacados -->
+<!-- <section class="featured-products-section"> -->
+    <!-- <div class="section-content">
+        <h2>Productos Destacados</h2>
+        <p>Nuestros productos más populares y mejor valorados. ¡No te los pierdas!</p>
+        
+        <div class="products-grid-wrapper">
+            <div class="products-grid" id="productsGrid"> -->
+                <!-- Producto 1 -->
+                <!-- <div class="product-card">
+                    <img src="https://placehold.co/320x220/F0E6D8/594833?text=Camisa+Elegante" alt="Camisa Elegante">
+                    <div class="product-info">
+                        <h3>Camisa Elegante</h3>
+                        <div class="product-price">$129.99</div>
+                        <p class="product-description">Camisa de algodón premium con corte moderno, perfecta para ocasiones especiales.</p>
+                        <button>Comprar Ahora</button>
+                    </div>
+                </div> -->
+
+                <!-- Producto 2 -->
+                <!-- <div class="product-card">
+                    <img src="https://placehold.co/320x220/E3DDF3/594833?text=Vestido+Casual" alt="Vestido Casual">
+                    <div class="product-info">
+                        <h3>Vestido Casual</h3>
+                        <div class="product-price">$89.99</div>
+                        <p class="product-description">Vestido versátil y cómodo, ideal para el día a día con un toque sofisticado.</p>
+                        <button>Comprar Ahora</button>
+                    </div>
+                </div> -->
+
+                <!-- Producto 3 -->
+                <!-- <div class="product-card">
+                    <img src="https://placehold.co/320x220/D0E0E3/594833?text=Jeans+Premium" alt="Jeans Premium">
+                    <div class="product-info">
+                        <h3>Jeans Premium</h3>
+                        <div class="product-price">$95.00</div>
+                        <p class="product-description">Jeans de mezclilla de alta calidad con ajuste perfecto y durabilidad excepcional.</p>
+                        <button>Comprar Ahora</button>
+                    </div>
+                </div> -->
+
+                <!-- Producto 4 -->
+                <!-- <div class="product-card">
+                    <img src="https://placehold.co/320x220/C8E6C9/594833?text=Chaqueta+Urbana" alt="Chaqueta Urbana">
+                    <div class="product-info">
+                        <h3>Chaqueta Urbana</h3>
+                        <div class="product-price">$159.99</div>
+                        <p class="product-description">Chaqueta moderna con diseño urbano, perfecta para el estilo casual contemporáneo.</p>
+                        <button>Comprar Ahora</button>
+                    </div>
+                </div> -->
+
+                <!-- Producto 5 -->
+                <!-- <div class="product-card">
+                    <img src="https://placehold.co/320x220/FFE0B2/594833?text=Zapatos+Deportivos" alt="Zapatos Deportivos">
+                    <div class="product-info">
+                        <h3>Zapatos Deportivos</h3>
+                        <div class="product-price">$110.00</div>
+                        <p class="product-description">Calzado deportivo con tecnología de amortiguación avanzada para máximo confort.</p>
+                        <button>Comprar Ahora</button>
+                    </div>
+                </div> -->
+
+                <!-- Producto 6 -->
+                <!-- <div class="product-card">
+                    <img src="https://placehold.co/320x220/F8BBD9/594833?text=Blusa+Femenina" alt="Blusa Femenina">
+                    <div class="product-info">
+                        <h3>Blusa Femenina</h3>
+                        <div class="product-price">$75.50</div>
+                        <p class="product-description">Blusa elegante con detalles únicos, ideal para looks profesionales y casuales.</p>
+                        <button>Comprar Ahora</button>
+                    </div>
+                </div> -->
+            <!-- </div>
+        </div> -->
+
+        <!-- Controles de navegación -->
+        <!-- <div class="products-navigation">
+            <button type="button" (click)="scrollProducts('left')" aria-label="Anterior">‹</button>
+            <button type="button" (click)="scrollProducts('right')" aria-label="Siguiente">›</button>
+        </div>
+    </div> -->
+<!-- </section> -->
+
+<!-- Sección de Newsletter -->
+<!-- <section class="newsletter-section">
+    <div class="section-content">
+        <h2>¡Únete a nuestra comunidad!</h2>
+        <p>Suscríbete para recibir las últimas novedades y ofertas exclusivas directamente en tu correo.</p>
+        <form>
+            <input type="email" placeholder="Introduce tu correo electrónico" required>
+            <button type="submit">Suscribirse</button>
+        </form>
+    </div>
+</section> -->

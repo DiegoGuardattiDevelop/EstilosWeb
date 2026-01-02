@@ -1,0 +1,283 @@
+.profile-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: #f5f5f5;
+}
+
+.auth-container {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 500px;
+  padding: 30px;
+  margin: 20px auto;
+
+  .auth-header {
+    text-align: center;
+    margin-bottom: 30px;
+
+    .auth-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: #2f3542;
+      margin-bottom: 10px;
+    }
+
+    .auth-subtitle {
+      color: #747d8c;
+      font-size: 16px;
+    }
+  }
+
+  .auth-loading {
+    text-align: center;
+    padding: 40px 20px;
+    color: #747d8c;
+
+    .fa-spinner {
+      font-size: 24px;
+      margin-bottom: 15px;
+      color: #4f6df5;
+    }
+
+    p {
+      margin: 0;
+      font-size: 16px;
+    }
+  }
+
+  // Avatar del usuario
+  .profile-avatar {
+    text-align: center;
+    margin-bottom: 30px;
+
+    .avatar-circle {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(45deg, #705e30, #f6d16a, #705e30);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 15px;
+      font-size: 24px;
+      font-weight: 700;
+      color: white;
+      box-shadow: 0 4px 15px rgba(112, 94, 48, 0.3);
+    }
+
+    .user-name {
+      font-size: 22px;
+      font-weight: 600;
+      color: #2f3542;
+      margin: 0;
+    }
+  }
+
+  // Detalles del perfil
+  .profile-details {
+    margin: 25px 0;
+
+    .profile-detail {
+      display: flex;
+      align-items: center;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 12px;
+      margin-bottom: 15px;
+      transition: all 0.3s ease;
+
+      &:hover {
+        background: #e9ecef;
+        transform: translateY(-2px);
+      }
+
+      .detail-icon {
+        width: 50px;
+        height: 50px;
+        background: white;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+        i {
+          font-size: 20px;
+          color: #4f6df5;
+        }
+      }
+
+      .detail-content {
+        flex: 1;
+
+        label {
+          display: block;
+          font-size: 12px;
+          color: #747d8c;
+          font-weight: 600;
+          text-transform: uppercase;
+          margin-bottom: 4px;
+        }
+
+        span {
+          color: #2f3542;
+          font-size: 16px;
+          font-weight: 500;
+        }
+      }
+    }
+  }
+
+  // Botones de acción
+  .profile-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 25px;
+
+    .auth-button {
+      flex: 1;
+      padding: 15px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+
+      &.secondary {
+        background: #f8f9fa;
+        color: #2f3542;
+        border: 2px solid #e0e0e0;
+
+        &:hover {
+          background: #e9ecef;
+          border-color: #4f6df5;
+          transform: translateY(-2px);
+        }
+      }
+
+      &.logout {
+        background: #ff4757;
+        color: white;
+
+        &:hover {
+          background: #c23616;
+          transform: translateY(-2px);
+        }
+      }
+    }
+  }
+}
+
+// Estilos para el mensaje de error (consistente con register)
+.error-message {
+  background: #fef2f2;
+  border: 2px solid #fecaca;
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin: 0 0 20px 0;
+  color: #dc2626;
+  display: none;
+  align-items: flex-start;
+  gap: 10px;
+  position: relative;
+  
+  &.show {
+    display: flex;
+    animation: slideInUp 0.3s ease;
+  }
+  
+  .fa-exclamation-circle {
+    color: #dc2626;
+    margin-top: 2px;
+    flex-shrink: 0;
+    font-size: 16px;
+  }
+  
+  span {
+    flex: 1;
+    font-size: 14px;
+    line-height: 1.4;
+    font-weight: 500;
+  }
+  
+  .error-close {
+    background: none;
+    border: none;
+    color: #dc2626;
+    cursor: pointer;
+    padding: 4px;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+    flex-shrink: 0;
+    
+    &:hover {
+      background: rgba(220, 38, 38, 0.1);
+    }
+    
+    .fa-times {
+      font-size: 12px;
+      margin: 0;
+    }
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 500px) {
+  .auth-container {
+    padding: 20px;
+    margin: 10px;
+    
+    .auth-title {
+      font-size: 24px;
+    }
+
+    .profile-actions {
+      flex-direction: column;
+    }
+
+    .profile-detail {
+      padding: 15px;
+      
+      .detail-icon {
+        width: 40px;
+        height: 40px;
+        margin-right: 12px;
+        
+        i {
+          font-size: 18px;
+        }
+      }
+    }
+  }
+
+  .profile-container {
+    padding: 10px;
+    align-items: flex-start;
+  }
+}

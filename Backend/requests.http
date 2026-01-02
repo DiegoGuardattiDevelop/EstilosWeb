@@ -1,0 +1,39 @@
+###
+# GET all categories
+GET http://127.0.0.1:8000/api/categories
+Accept: application/json
+
+###
+# CREATE a new category
+POST http://127.0.0.1:8000/api/categories
+Content-Type: application/json
+Accept: application/json
+
+{
+    "name": "Masculino",
+    "description": "Estilo y comodidad para el hombre moderno.",
+    "image_url": "https://via.placeholder.com/180",
+    "color": "#B6C7E3",
+    "text_color": "#0B1938"
+}
+
+###
+# GET a specific category by ID (e.g., ID 1)
+GET http://127.0.0.1:8000/api/categories/1
+Accept: application/json
+
+###
+# UPDATE a category by ID (e.g., ID 1)
+PUT http://127.0.0.1:8000/api/categories/1
+Content-Type: application/json
+Accept: application/json
+
+{
+    "name": "Masculino Actualizado",
+    "description": "Descripción actualizada para la categoría masculina."
+}
+
+###
+# DELETE a category by ID (e.g., ID 1)
+DELETE http://127.0.0.1:8000/api/categories/1
+Accept: application/json

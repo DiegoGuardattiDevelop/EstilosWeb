@@ -1,0 +1,81 @@
+<!-- src/app/components/footer/footer.component.html -->
+<footer class="footer">
+  <div class="footer-container">
+    <!-- Sección Quiénes Somos
+    <div class="footer-section">
+      <h3>Quiénes Somos</h3>
+      <p>{{ footerData.companyInfo.description }}</p>
+      
+    </div> -->
+    
+    <!-- Sección Enlaces Rápidos -->
+    <div class="footer-section">
+      <h3>Enlaces Rápidos</h3>
+      <ul class="footer-links">
+        <li *ngFor="let link of footerData.quickLinks">
+          <a [routerLink]="link.route" (click)="scrollToTop()">
+            <i [class]="link.icon"></i> {{ link.name }}
+          </a>
+        </li>
+      </ul>
+    </div>
+    
+    <!-- Sección Redes Sociales -->
+    <div class="footer-section">
+      <h3>Síguenos en Redes</h3>
+      <p>Mantente conectado con nosotros</p>
+      <div class="social-links">
+        <a *ngFor="let social of footerData.socialLinks" 
+           [href]="social.url" 
+           [title]="social.name"
+           target="_blank"
+           rel="noopener noreferrer">
+          <i [class]="social.icon"></i>
+        </a>
+      </div>
+    </div>
+    
+    <!-- Sección Contacto -->
+    <div class="footer-section">
+      <h3>Contacto</h3>
+      <ul class="footer-links">
+        <li>
+          <a href="https://maps.google.com" target="_blank">
+            <i class="fas fa-map-marker-alt"></i> 
+            {{ footerData.companyInfo.address }}
+          </a>
+        </li>
+        <!-- <li>
+          <a [href]="'tel:' + footerData.companyInfo.phone">
+            <i class="fas fa-phone"></i> 
+            {{ footerData.companyInfo.phone }}
+          </a>
+        </li> -->
+        <!-- <li>
+          <a [href]="'mailto:' + footerData.companyInfo.email">
+            <i class="fas fa-envelope"></i> 
+            {{ footerData.companyInfo.email }}
+          </a>
+        </li> -->
+        <!-- <li>
+          <a href="#">
+            <i class="fas fa-clock"></i> 
+            Horario: Lunes a Viernes 9:00-18:00
+          </a>
+        </li> -->
+        <button (click)="openWhatsApp()" class="whatsapp-button">
+        <i class="fab fa-whatsapp"></i> Contáctanos por WhatsApp
+      </button>
+      </ul>
+    </div>
+  </div>
+  
+  <div class="footer-bottom">
+    <p>
+      &copy; {{ currentYear }} {{ footerData.companyInfo.name }}. 
+      Todos los derechos reservados. | 
+      <a routerLink="/privacy" (click)="scrollToTop()">Política de Privacidad</a> | 
+      <a routerLink="/terms" (click)="scrollToTop()">Términos de Servicio</a>
+    </p>
+  </div>
+</footer>

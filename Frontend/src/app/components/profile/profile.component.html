@@ -1,0 +1,87 @@
+<div class="profile-container">
+  <div class="auth-container">
+    <div class="auth-header">
+      <h2 class="auth-title">Mi Perfil</h2>
+      <p class="auth-subtitle">Gestiona tu información personal</p>
+    </div>
+
+    <!-- Mensaje de error -->
+    <div *ngIf="showError" class="error-message show">
+      <i class="fas fa-exclamation-circle"></i>
+      <span>{{ errorMessage }}</span>
+      <button type="button" class="error-close" (click)="closeError()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <!-- Loading state -->
+    <div *ngIf="loading" class="auth-loading">
+      <i class="fas fa-spinner fa-spin"></i>
+      <p>Cargando información...</p>
+    </div>
+
+    <!-- Información del perfil -->
+    <div *ngIf="!loading && user" class="profile-info">
+      <div class="profile-avatar">
+        <div class="avatar-circle">
+          {{ getUserInitials() }}
+        </div>
+        <h3 class="user-name">{{ user.name }}</h3>
+      </div>
+
+      <div class="profile-details">
+        <div class="profile-detail">
+          <div class="detail-icon">
+            <i class="fas fa-user"></i>
+          </div>
+          <div class="detail-content">
+            <label>Nombre completo</label>
+            <span>{{ user.name }}</span>
+          </div>
+        </div>
+
+        <div class="profile-detail">
+          <div class="detail-icon">
+            <i class="fas fa-envelope"></i>
+          </div>
+          <div class="detail-content">
+            <label>Email</label>
+            <span>{{ user.email }}</span>
+          </div>
+        </div>
+
+        <div class="profile-detail">
+          <div class="detail-icon">
+            <i class="fas fa-calendar-alt"></i>
+          </div>
+          <div class="detail-content">
+            <label>Miembro desde</label>
+            <span>{{ getMemberSince() }}</span>
+          </div>
+        </div>
+
+        <div class="profile-detail">
+          <div class="detail-icon">
+            <i class="fas fa-shopping-bag"></i>
+          </div>
+          <div class="detail-content">
+            <label>Pedidos realizados</label>
+            <span>{{ user.orders_count || 15 }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botones de acción -->
+    <div class="profile-actions" *ngIf="!loading && user">
+      <button class="auth-button secondary" (click)="goToHome()">
+        <i class="fas fa-home"></i>
+        Volver al Inicio
+      </button>
+      <button (click)="onLogout()" class="auth-button logout">
+        <i class="fas fa-sign-out-alt"></i>
+        Cerrar Sesión
+      </button>
+    </div>
+  </div>
+</div>

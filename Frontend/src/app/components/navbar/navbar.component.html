@@ -1,0 +1,113 @@
+<nav class="navbar">
+  <!-- Logo -->
+  <div class="navbar-brand">
+    <a routerLink="/home" class="logo" (click)="closeMenus()">
+      <span class="logo-text">EstilosWeb</span>
+    </a>
+  </div>
+
+  <!-- Navigation Menu -->
+  <ul class="nav-menu" [class.active]="mobileMenuOpen">
+    <li class="nav-item">
+      <a routerLink="/home" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeMenus()" class="nav-link">
+        Inicio
+      </a>
+    </li>
+    <li class="nav-item dropdown" [class.open]="categoriesOpen">
+      <button type="button" class="nav-link dropdown-toggle" (click)="toggleCategories(); $event.preventDefault()">
+        Categorías <span class="caret">▾</span>
+      </button>
+      <div class="dropdown-menu" [class.open]="categoriesOpen">
+        <a routerLink="/products-by-category/masculino" (click)="closeMenus()">Hombre</a>
+        <a routerLink="/products-by-category/femenino" (click)="closeMenus()">Mujer</a>
+        <a routerLink="/products-by-category/ninos" (click)="closeMenus()">Niños</a>
+        <a routerLink="/products-by-category/accesorios" (click)="closeMenus()">Accesorios</a>
+        <a routerLink="/products-by-category" (click)="closeMenus()">Todas las categorías</a>
+      </div>
+    </li>
+    <li class="nav-item">
+      <a routerLink="/home" (click)="closeMenus()" class="nav-link">Colecciones</a>
+    </li>
+    <!-- Auth buttons in mobile menu -->
+    <li class="nav-item auth-mobile" *ngIf="mobileMenuOpen && !(isAuthenticated$ | async)">
+      <button type="button" routerLink="/login" class="btn btn-login" (click)="closeMenus()">Iniciar Sesión</button>
+      <button type="button" routerLink="/register" class="btn btn-register" (click)="closeMenus()">Registrarse</button>
+    </li>
+  </ul>
+
+  <!-- Search Bar -->
+  <div class="search-container" [class.active]="searchOpen">
+    <form [formGroup]="searchForm" class="search-form">
+      <input
+        type="text"
+        class="search-input"
+        placeholder="Buscar productos..."
+        formControlName="query"
+        autocomplete="off"
+      />
+      <button type="button" class="search-btn" (click)="toggleSearch()">
+        <span>🔍</span>
+      </button>
+    </form>
+
+    <!-- Search Results -->
+    <div class="search-results" *ngIf="searchOpen && searchResults.length > 0">
+      <div
+        class="search-result-item"
+        *ngFor="let product of searchResults"
+        (click)="onSearchResultClick(product)"
+      >
+        <img [src]="product.image" [alt]="product.name" />
+        <div class="result-info">
+          <span class="result-name">{{ product.name }}</span>
+          <span class="result-price">${{ product.price }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="search-loading" *ngIf="searchOpen && searchLoading">
+      Buscando...
+    </div>
+  </div>
+
+  <!-- Actions (Cart, User, Auth) -->
+  <div class="navbar-actions">
+    <!-- Cart Icon -->
+    <a routerLink="/cart" class="cart-icon" (click)="closeMenus()">
+      <span class="cart-icon-svg">🛒</span>
+      <span class="cart-count" *ngIf="(cartItems$ | async) as items">
+        {{ items.length }}
+      </span>
+    </a>
+
+    <!-- User Menu (authenticated) -->
+    <div class="user-menu" *ngIf="isAuthenticated$ | async">
+      <button type="button" class="user-btn" (click)="toggleUserMenu()">
+        <span class="user-icon">👤</span>
+        <span class="user-name">{{ (currentUser$ | async)?.name || (currentUser$ | async)?.email }}</span>
+      </button>
+
+      <div class="user-dropdown" *ngIf="userMenuOpen">
+        <a routerLink="/profile" (click)="closeMenus()">Mi Perfil</a>
+        <a routerLink="/profile" (click)="closeMenus()">Mis Órdenes</a>
+        <hr />
+        <button type="button" class="logout-btn" (click)="logout()">Cerrar Sesión</button>
+      </div>
+    </div>
+
+    <!-- Auth Buttons (not authenticated, desktop) -->
+    <div class="auth-buttons" *ngIf="!(isAuthenticated$ | async)">
+      <button type="button" routerLink="/login" class="btn btn-login" (click)="closeMenus()">Iniciar Sesión</button>
+      <button type="button" routerLink="/register" class="btn btn-register" (click)="closeMenus()">Registrarse</button>
+    </div>
+  </div>
+
+  <!-- Mobile Menu Button -->
+  <button type="button" class="mobile-menu-btn" (click)="toggleMobileMenu()" aria-label="Toggle mobile menu">
+    <span class="hamburger" [class.active]="mobileMenuOpen">
+      <span></span>
+      <span></span>
+      <span></span>
+    </span>
+  </button>
+</nav>

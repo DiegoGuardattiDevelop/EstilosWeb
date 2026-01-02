@@ -1,0 +1,164 @@
+// src/app/components/product-detail/product-detail.component.ts
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { switchMap, takeUntil } from 'rxjs/operators';
+import { Subject, EMPTY, Observable } from 'rxjs';
+
+import { ProductService } from '../../services/product.service';
+import { Product } from '../../models/product.model';
+import { CartService } from '../../services/cart.service';
+import { AuthService } from '../../services/auth.service';
+import { CartItem } from '../../models/cart-item.model';
+
+interface Category {
+  id: number;
+  name: string;
+  color: string;
+}
+
+@Component({
+  selector: 'app-product-detail',
+  standalone: true,
+  imports: [CommonModule, RouterModule, FormsModule],
+  templateUrl: './product-detail.component.html',
+  styleUrls: ['./product-detail.component.scss']
+})
+export class ProductDetailComponent implements OnInit, OnDestroy {
+  product: (Product & { category?: Category }) | null = null;
+  isLoading = true;
+  error: string = '';
+  showNotification: boolean = false;
+  showWarning: boolean = false;
+  warningMessage: string = '';
+  cartItems$!: Observable<CartItem[]>;
+  cartTotal$!: Observable<number>;
+  isGuest: boolean = true;
+  hasReachedLimit: boolean = false;
+
+  private destroy$ = new Subject<void>();
+
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private productService: ProductService,
+    public cartService: CartService,
+    private authService: AuthService
+  ) { }
+
+  ngOnInit(): void {
+    this.cartItems$ = this.cartService.getCartItems();
+    this.cartTotal$ = this.cartService.getTotalPrice();
+    
+    // Verificar si es invitado
+    this.isGuest = !this.authService.isLoggedIn();
+    
+    // Verificar límite de invitado
+    this.cartService.hasReachedGuestLimit().subscribe(hasReached => {
+      this.hasReachedLimit = hasReached;
+    });
+
+    this.route.paramMap.pipe(
+      switchMap(params => {
+        const productSlug = params.get('slug');
+        this.isLoading = true;
+        this.error = '';
+        this.product = null;
+
+        if (!productSlug) {
+          this.router.navigate(['/']);
+          return EMPTY;
+        }
+
+        return this.productService.getProductBySlug(productSlug);
+      }),
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (productData) => {
+        this.product = productData;
+        this.isLoading = false;
+      },
+      error: (error: any) => {
+        console.error('Error loading product:', error);
+        this.error = 'Error al cargar el producto';
+        this.isLoading = false;
+      }
+    });
+  }
+
+  addToCart(): void {
+    if (!this.product) return;
+    
+    const result = this.cartService.addToCart(this.product, 1);
+    
+    if (result.success) {
+      // Mostrar notificación de éxito
+      this.showNotification = true;
+      this.showWarning = false;
+      
+      setTimeout(() => {
+        this.showNotification = false;
+      }, 3000);
+    } else {
+      // Mostrar advertencia
+      this.showWarning = true;
+      this.warningMessage = result.message!;
+      
+      setTimeout(() => {
+        this.showWarning = false;
+      }, 5000);
+    }
+  }
+
+  getButtonText(): string {
+    if (!this.product) return 'Agregar al Carrito';
+    
+    if (this.product.stock === 0) {
+      return 'Agotado';
+    }
+    
+    if (this.isGuest && this.hasReachedLimit) {
+      return 'Límite Alcanzado';
+    }
+    
+    return 'Agregar al Carrito';
+  }
+
+  isButtonDisabled(): boolean {
+    if (!this.product) return true;
+    
+    return this.product.stock === 0 || (this.isGuest && this.hasReachedLimit);
+  }
+
+  goBack(): void {
+    window.history.back();
+  }
+
+  goToCart(): void {
+    this.router.navigate(['/cart']);
+  }
+
+  closeWarning(): void {
+    this.showWarning = false;
+  }
+
+  getProductImageUrl(imageUrl: string): string {
+    if (!imageUrl) return '/assets/images/placeholder.jpg';
+    
+    if (imageUrl.startsWith('http')) {
+      return imageUrl;
+    }
+    
+    if (imageUrl.startsWith('storage/')) {
+      return `http://localhost:8000/${imageUrl}`;
+    }
+    
+    return `http://localhost:8000/storage/${imageUrl}`;
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+}

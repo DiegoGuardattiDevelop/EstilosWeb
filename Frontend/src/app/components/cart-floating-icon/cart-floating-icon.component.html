@@ -1,0 +1,20 @@
+<!-- src/app/components/cart-floating-icon/cart-floating-icon.component.html -->
+<div *ngIf="shouldShowIcon$ | async" 
+     class="cart-floating-icon" 
+     [class.pulsing]="isPulsing"
+     (click)="onCartClick()"
+     [title]="(isGuest$ | async) ? ((hasReachedLimit$ | async) ? 'Límite de invitado alcanzado' : 'Ver carrito') : 'Ver carrito'">
+    
+    <i class="fas fa-shopping-cart"></i>
+    
+    <span *ngIf="cartItemsCount$ | async as count" 
+          class="cart-badge"
+          [class.limit-reached]="(isGuest$ | async) && (hasReachedLimit$ | async)">
+        {{ count }}
+    </span>
+    
+    <!-- Indicador de límite para invitados -->
+    <div *ngIf="(isGuest$ | async) && (hasReachedLimit$ | async)" class="limit-indicator">
+        <i class="fas fa-exclamation-triangle"></i>
+    </div>
+</div>

@@ -1,0 +1,153 @@
+// Contenedor principal del icono
+.cart-floating-icon {
+  // Posición fija en la esquina inferior derecha
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  
+  // Tamaño y forma
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  
+  // Estilos visuales
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: 3px solid white;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  
+  // Centrar contenido
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  // Comportamiento
+  cursor: pointer;
+  z-index: 1000; // Para que esté por encima de todo
+  transition: all 0.3s ease;
+  
+  // Icono interno
+  i {
+    color: white;
+    font-size: 1.5rem;
+  }
+
+  // Estado cuando hay items en el carrito
+  &.has-items {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+  }
+
+  // Efecto hover
+  &:hover {
+    transform: scale(1.1) translateY(-5px);
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
+  }
+
+  // Animación de pulso cuando se agregan items
+  &.pulsing {
+    animation: pulse 0.6s ease-in-out;
+  }
+}
+
+// Badge que muestra la cantidad
+.cart-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #ff4757;
+  color: white;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
+  animation: bounceIn 0.5s;
+}
+
+// Efecto de click en el icono
+.cart-floating-icon:active {
+  transform: scale(0.95) translateY(-2px);
+  transition: transform 0.1s ease;
+}
+
+// En cart-floating-icon.component.scss
+.limit-indicator {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #ffc107;
+  color: #856404;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  animation: pulse 2s infinite;
+}
+
+.cart-badge.limit-reached {
+  background: #dc3545;
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
+}
+
+// Animación de pulso
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+// Animación del badge
+@keyframes bounceIn {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+// Responsive para móviles
+@media (max-width: 768px) {
+  .cart-floating-icon {
+    bottom: 20px;
+    right: 20px;
+    width: 55px;
+    height: 55px;
+    
+    i {
+      font-size: 1.3rem;
+    }
+    
+    .cart-badge {
+      width: 22px;
+      height: 22px;
+      font-size: 0.7rem;
+    }
+  }
+}

@@ -1,0 +1,196 @@
+<!-- src/app/components/product-detail/product-detail.component.html -->
+<!-- Loading State -->
+<div *ngIf="isLoading" class="loading-overlay">
+    <div class="spinner-container">
+        <div class="spinner"></div>
+        <p>Cargando producto...</p>
+    </div>
+</div>
+
+<!-- Error State -->
+<div *ngIf="!isLoading && error" class="error-overlay">
+    <div class="error-card">
+        <i class="fas fa-exclamation-triangle error-icon"></i>
+        <h3>{{ error }}</h3>
+        <p>No pudimos cargar la información del producto</p>
+        <button (click)="goBack()" class="error-button">
+            <i class="fas fa-arrow-left"></i> Volver
+        </button>
+    </div>
+</div>
+
+<!-- Success State -->
+<div *ngIf="!isLoading && !error && product" class="product-detail-container">
+    
+    <!-- Header with back button -->
+    <div class="navigation-header">
+        <button (click)="goBack()" class="nav-button">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        <h1 class="product-name">{{ product.name }}</h1>
+        <div class="product-price">{{ product.price | currency:'USD':'symbol':'1.2-2' }}</div>
+    </div>
+
+    <!-- Product Content -->
+    <div class="product-detail-card">
+        <div class="product-content">
+            <!-- Product Image -->
+            <div class="image-container">
+                    <button type="button" class="image-button" (click)="openLightbox(product.images ? product.images.indexOf(selectedImage || product.image_url) : 0)" aria-label="Abrir galería">
+                        <img
+                            [src]="getProductImageUrl(selectedImage || product.image_url)"
+                            [alt]="product.name || 'Imagen del producto'"
+                            class="product-image"
+                            loading="lazy"
+                        />
+                    </button>
+                    <div class="image-overlay"></div>
+
+                    <!-- Thumbnails / gallery -->
+                    <div *ngIf="product.images && product.images.length" class="thumbnails" role="list">
+                        <button
+                            *ngFor="let img of product.images; let i = index"
+                            class="thumbnail"
+                            (click)="selectImage(img)"
+                            (click)="openLightbox(i)"
+                            (keydown.enter)="selectImage(img)"
+                            [attr.aria-pressed]="selectedImage === img"
+                            role="listitem"
+                            aria-label="Ver imagen alternativa"
+                            type="button"
+                        >
+                            <img [src]="getProductImageUrl(img)" [alt]="product.name + ' thumbnail'" loading="lazy" />
+                        </button>
+                    </div>
+            </div>
+
+            <!-- Product Info -->
+            <div class="product-info">
+                <!-- Category Badge -->
+                <div *ngIf="product.category" 
+                     class="category-badge" 
+                     [style.background-color]="product.category.color"
+                     [style.color]="'white'">
+                    {{ product.category.name }}
+                </div>
+
+                <!-- Guest Limit Info -->
+                <div *ngIf="isGuest" class="guest-info">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Invitado: puedes agregar hasta 2 productos. <a routerLink="/auth/register">Regístrate</a> para más.</span>
+                </div>
+
+                <!-- Product Meta -->
+                <div class="product-meta">
+                    <div class="stock-indicator" [class.low-stock]="product.stock < 10">
+                        <i class="fas fa-box"></i>
+                        <span>{{ product.stock > 0 ? (product.stock + ' disponibles') : 'Agotado' }}</span>
+                    </div>
+                    <div class="rating">
+                        <div class="stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                        </div>
+                        <span class="review-count">(24 reseñas)</span>
+                    </div>
+                </div>
+
+                <!-- Product Description -->
+                <p class="product-description">{{ product.description }}</p>
+
+                                <!-- Product Actions -->
+                                <div class="buy-box">
+                                    <div class="product-actions">
+                    <div class="quantity-selector" aria-label="Selector de cantidad">
+                        <button type="button" class="qty-btn" (click)="decreaseQuantity()" [disabled]="quantity <= 1" aria-label="Disminuir cantidad">−</button>
+                        <input aria-label="Cantidad" class="qty-input" type="number" [value]="quantity" (input)="onQuantityInput($event.target.value)" />
+                        <button type="button" class="qty-btn" (click)="increaseQuantity()" [disabled]="(product && quantity >= product.stock) || (isGuest && hasReachedLimit)" aria-label="Aumentar cantidad">+</button>
+                    </div>
+
+                    <button (click)="addToCart()"
+                            class="add-to-cart-btn"
+                            [disabled]="isButtonDisabled()"
+                            [class.disabled]="isButtonDisabled()"
+                            [attr.aria-disabled]="isButtonDisabled()"
+                            aria-label="Agregar al carrito">
+                        <i class="fas fa-shopping-cart"></i>
+                        {{ getButtonText() }}
+                    </button>
+
+                    <button class="wishlist-btn" aria-label="Agregar a favoritos">
+                        <i class="far fa-heart"></i>
+                    </button>
+                  </div>
+
+                  <div class="button-reason" *ngIf="isButtonDisabled()">
+                      <small *ngIf="product && product.stock === 0">Agotado</small>
+                      <small *ngIf="isGuest && hasReachedLimit">Has alcanzado el límite de invitado</small>
+                  </div>
+                </div>
+
+                <!-- Additional Details -->
+                <div class="additional-details">
+                    <div class="detail-item">
+                        <i class="fas fa-shipping-fast"></i>
+                        <span>Envío gratis en compras mayores a $50</span>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-undo"></i>
+                        <span>Devoluciones gratuitas en 30 días</span>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Garantía del producto incluida</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- No Product Found -->
+<div *ngIf="!isLoading && !error && !product" class="error-overlay">
+    <div class="error-card">
+        <i class="fas fa-search error-icon"></i>
+        <h3>Producto no encontrado</h3>
+        <p>El producto que buscas no está disponible</p>
+        <button (click)="goBack()" class="error-button">
+            <i class="fas fa-arrow-left"></i> Volver a la tienda
+        </button>
+    </div>
+</div>
+
+<!-- Warning Notification -->
+<div *ngIf="showWarning" class="warning-notification">
+    <div class="warning-content">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span>{{ warningMessage }}</span>
+    </div>
+    <button (click)="closeWarning()" class="close-warning-btn">
+        <i class="fas fa-times"></i>
+    </button>
+</div>
+
+<!-- Success Notification -->
+<div *ngIf="showNotification" class="notification">
+    <div class="notification-content">
+        <i class="fas fa-check-circle"></i>
+        <span>Producto agregado al carrito</span>
+    </div>
+    <button (click)="goToCart()" class="view-cart-btn">
+        Ver Carrito
+    </button>
+</div>
+
+<!-- Lightbox modal -->
+<div *ngIf="lightboxOpen" class="lightbox" (click)="closeLightbox()" (keydown)="handleKeydown($event)" tabindex="-1">
+    <div class="lightbox-content" (click)="$event.stopPropagation()">
+        <button class="lightbox-close" (click)="closeLightbox()" aria-label="Cerrar galería">✕</button>
+        <button class="lightbox-prev" (click)="prevLightbox()" aria-label="Imagen anterior">◀</button>
+        <img [src]="getProductImageUrl(imagesList[lightboxIndex])" [alt]="product?.name || 'Imagen'" />
+        <button class="lightbox-next" (click)="nextLightbox()" aria-label="Imagen siguiente">▶</button>
+    </div>
+</div>

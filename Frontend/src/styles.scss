@@ -1,0 +1,64 @@
+.main-header {
+  position:absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 15px 0;
+  border-bottom: none; /* Removemos el borde inferior por defecto */
+  z-index: 1000; /* Asegura que esté por encima de otros elementos */
+}
+ .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-left: 0; /* Eliminar padding izquierdo */
+  padding-right: 20px;
+  padding-top: 15px;
+  padding-bottom: 15px;
+}
+
+  .logo a {
+    font-size: 1.5em; /* Aumenté un poco el tamaño del logo */
+    color: #000;
+    text-decoration: none;
+    font-weight: bold;
+  }
+
+  .main-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+  }
+
+  .main-nav li {
+    margin-left: 20px;
+  }
+
+  .login-link {
+    color: #000; 
+    text-decoration: none;
+    font-size: 1em;
+    transition: color 0.3s ease;
+
+    // &:hover {
+    //   color: #ccc; 
+    // }
+  }
+
+  /* Estilos para el header transparente */
+//   &.transparent-header {
+//     background-color: transparent; 
+//   }
+// }
+
+.home-page-container {
+//   margin-top: 60px; /* Ajusta este valor según la altura de tu header */
+  display: flex;
+  flex-direction: row-reverse;
+  min-height: calc(100vh - 60px); 
+}
+

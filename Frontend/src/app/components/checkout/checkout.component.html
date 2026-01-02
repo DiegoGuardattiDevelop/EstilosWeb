@@ -1,0 +1,386 @@
+<div class="checkout-container">
+  <!-- Header -->
+  <div class="checkout-header">
+    <h1>Procesar Compra</h1>
+    <p class="step-indicator">Paso {{ currentStep }} de {{ totalSteps }}</p>
+  </div>
+
+  <!-- Indicador de pasos -->
+  <div class="steps-indicator">
+    <div class="step" [class.active]="currentStep >= 1" [class.completed]="currentStep > 1">
+      <div class="step-number">1</div>
+      <span class="step-label">Envío</span>
+    </div>
+    <div class="step-connector" [class.active]="currentStep > 1"></div>
+    <div class="step" [class.active]="currentStep >= 2" [class.completed]="currentStep > 2">
+      <div class="step-number">2</div>
+      <span class="step-label">Confirmación</span>
+    </div>
+    <div class="step-connector" [class.active]="currentStep > 2"></div>
+    <div class="step" [class.active]="currentStep >= 3">
+      <div class="step-number">3</div>
+      <span class="step-label">Pago</span>
+    </div>
+  </div>
+
+  <!-- Contenido principal -->
+  <div class="checkout-content">
+    <!-- Columna izquierda: Formularios -->
+    <div class="checkout-form">
+      <!-- Mensaje de error -->
+      <div class="alert alert-error" *ngIf="errorMessage">
+        <span class="alert-icon">⚠️</span>
+        <span>{{ errorMessage }}</span>
+      </div>
+
+      <!-- PASO 1: Información de Envío -->
+      <div class="step-content" *ngIf="currentStep === 1">
+        <h2>Información de Envío</h2>
+        <form [formGroup]="shippingForm">
+          <!-- Nombre y Apellido -->
+          <div class="form-row">
+            <div class="form-group">
+              <label for="firstName">Nombre</label>
+              <input
+                id="firstName"
+                type="text"
+                formControlName="firstName"
+                [class.is-invalid]="isFieldInvalid('firstName', shippingForm)"
+                placeholder="Juan"
+              />
+              <span class="error-text" *ngIf="isFieldInvalid('firstName', shippingForm)">
+                {{ getFieldError('firstName', shippingForm) }}
+              </span>
+            </div>
+            <div class="form-group">
+              <label for="lastName">Apellido</label>
+              <input
+                id="lastName"
+                type="text"
+                formControlName="lastName"
+                [class.is-invalid]="isFieldInvalid('lastName', shippingForm)"
+                placeholder="Pérez"
+              />
+              <span class="error-text" *ngIf="isFieldInvalid('lastName', shippingForm)">
+                {{ getFieldError('lastName', shippingForm) }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Email y Teléfono -->
+          <div class="form-row">
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input
+                id="email"
+                type="email"
+                formControlName="email"
+                [class.is-invalid]="isFieldInvalid('email', shippingForm)"
+                placeholder="juan@example.com"
+              />
+              <span class="error-text" *ngIf="isFieldInvalid('email', shippingForm)">
+                {{ getFieldError('email', shippingForm) }}
+              </span>
+            </div>
+            <div class="form-group">
+              <label for="phone">Teléfono</label>
+              <input
+                id="phone"
+                type="tel"
+                formControlName="phone"
+                [class.is-invalid]="isFieldInvalid('phone', shippingForm)"
+                placeholder="+1 234 567 8900"
+              />
+              <span class="error-text" *ngIf="isFieldInvalid('phone', shippingForm)">
+                {{ getFieldError('phone', shippingForm) }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Dirección -->
+          <div class="form-group">
+            <label for="address">Dirección</label>
+            <input
+              id="address"
+              type="text"
+              formControlName="address"
+              [class.is-invalid]="isFieldInvalid('address', shippingForm)"
+              placeholder="Calle Principal 123"
+            />
+            <span class="error-text" *ngIf="isFieldInvalid('address', shippingForm)">
+              {{ getFieldError('address', shippingForm) }}
+            </span>
+          </div>
+
+          <!-- Apartamento (Opcional) -->
+          <div class="form-group">
+            <label for="apartment">Apartamento, Suite, etc. (Opcional)</label>
+            <input
+              id="apartment"
+              type="text"
+              formControlName="apartment"
+              placeholder="Apt. 4B"
+            />
+          </div>
+
+          <!-- Ciudad, Estado, CP -->
+          <div class="form-row">
+            <div class="form-group">
+              <label for="city">Ciudad</label>
+              <input
+                id="city"
+                type="text"
+                formControlName="city"
+                [class.is-invalid]="isFieldInvalid('city', shippingForm)"
+                placeholder="México"
+              />
+              <span class="error-text" *ngIf="isFieldInvalid('city', shippingForm)">
+                {{ getFieldError('city', shippingForm) }}
+              </span>
+            </div>
+            <div class="form-group">
+              <label for="state">Estado/Provincia</label>
+              <input
+                id="state"
+                type="text"
+                formControlName="state"
+                [class.is-invalid]="isFieldInvalid('state', shippingForm)"
+                placeholder="CDMX"
+              />
+              <span class="error-text" *ngIf="isFieldInvalid('state', shippingForm)">
+                {{ getFieldError('state', shippingForm) }}
+              </span>
+            </div>
+            <div class="form-group">
+              <label for="zipCode">Código Postal</label>
+              <input
+                id="zipCode"
+                type="text"
+                formControlName="zipCode"
+                [class.is-invalid]="isFieldInvalid('zipCode', shippingForm)"
+                placeholder="06500"
+              />
+              <span class="error-text" *ngIf="isFieldInvalid('zipCode', shippingForm)">
+                {{ getFieldError('zipCode', shippingForm) }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Métodos de Envío -->
+          <div class="shipping-methods">
+            <h3>Método de Envío</h3>
+            <div class="methods-list">
+              <div
+                class="shipping-method"
+                *ngFor="let method of shippingMethods"
+                [class.selected]="selectedShipping?.id === method.id"
+                (click)="selectShippingMethod(method)"
+              >
+                <input
+                  type="radio"
+                  [id]="'shipping-' + method.id"
+                  [value]="method.id"
+                  [checked]="selectedShipping?.id === method.id"
+                  hidden
+                />
+                <label [for]="'shipping-' + method.id" class="method-label">
+                  <span class="method-name">{{ method.name }}</span>
+                  <span class="method-description">{{ method.description }}</span>
+                  <span class="method-cost">${{ method.cost }}</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- PASO 2: Confirmación de Orden -->
+      <div class="step-content" *ngIf="currentStep === 2">
+        <h2>Confirma tu Orden</h2>
+        <div class="confirmation-section">
+          <h3>Envío a:</h3>
+          <p class="confirmation-text">
+            <strong>{{ shippingForm.get('firstName')?.value }} {{ shippingForm.get('lastName')?.value }}</strong>
+          </p>
+          <p class="confirmation-text">
+            {{ shippingForm.get('address')?.value }}
+            <span *ngIf="shippingForm.get('apartment')?.value">
+              , {{ shippingForm.get('apartment')?.value }}
+            </span>
+          </p>
+          <p class="confirmation-text">
+            {{ shippingForm.get('city')?.value }}, {{ shippingForm.get('state')?.value }}
+            {{ shippingForm.get('zipCode')?.value }}
+          </p>
+        </div>
+
+        <div class="confirmation-section">
+          <h3>Contacto:</h3>
+          <p class="confirmation-text">
+            {{ shippingForm.get('email')?.value }}
+          </p>
+          <p class="confirmation-text">
+            {{ shippingForm.get('phone')?.value }}
+          </p>
+        </div>
+
+        <div class="confirmation-section">
+          <h3>Método de Envío:</h3>
+          <p class="confirmation-text">
+            <strong>{{ selectedShipping?.name }}</strong> - {{ selectedShipping?.description }}
+          </p>
+          <p class="confirmation-text">Costo: ${{ selectedShipping?.cost }}</p>
+        </div>
+      </div>
+
+      <!-- PASO 3: Pago -->
+      <div class="step-content" *ngIf="currentStep === 3">
+        <h2>Información de Pago</h2>
+        <form [formGroup]="paymentForm">
+          <!-- Nombre del Titular -->
+          <div class="form-group">
+            <label for="cardName">Nombre del Titular</label>
+            <input
+              id="cardName"
+              type="text"
+              formControlName="cardName"
+              [class.is-invalid]="isFieldInvalid('cardName', paymentForm)"
+              placeholder="Juan Pérez"
+            />
+            <span class="error-text" *ngIf="isFieldInvalid('cardName', paymentForm)">
+              {{ getFieldError('cardName', paymentForm) }}
+            </span>
+          </div>
+
+          <!-- Número de Tarjeta -->
+          <div class="form-group">
+            <label for="cardNumber">Número de Tarjeta</label>
+            <input
+              id="cardNumber"
+              type="text"
+              formControlName="cardNumber"
+              [class.is-invalid]="isFieldInvalid('cardNumber', paymentForm)"
+              placeholder="1234 5678 9012 3456"
+              maxlength="16"
+            />
+            <span class="error-text" *ngIf="isFieldInvalid('cardNumber', paymentForm)">
+              {{ getFieldError('cardNumber', paymentForm) }}
+            </span>
+          </div>
+
+          <!-- Fecha de Expiración y CVV -->
+          <div class="form-row">
+            <div class="form-group">
+              <label for="expiryDate">Fecha de Expiración</label>
+              <input
+                id="expiryDate"
+                type="text"
+                formControlName="expiryDate"
+                [class.is-invalid]="isFieldInvalid('expiryDate', paymentForm)"
+                placeholder="MM/YY"
+                maxlength="5"
+              />
+              <span class="error-text" *ngIf="isFieldInvalid('expiryDate', paymentForm)">
+                {{ getFieldError('expiryDate', paymentForm) }}
+              </span>
+            </div>
+            <div class="form-group">
+              <label for="cvv">CVV</label>
+              <input
+                id="cvv"
+                type="text"
+                formControlName="cvv"
+                [class.is-invalid]="isFieldInvalid('cvv', paymentForm)"
+                placeholder="123"
+                maxlength="4"
+              />
+              <span class="error-text" *ngIf="isFieldInvalid('cvv', paymentForm)">
+                {{ getFieldError('cvv', paymentForm) }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Dirección de Facturación -->
+          <div class="form-group">
+            <label for="billingAddress">
+              <input type="checkbox" id="billingAddress" formControlName="billingAddress" />
+              La dirección de facturación es igual a la de envío
+            </label>
+          </div>
+        </form>
+      </div>
+
+      <!-- Botones de acción -->
+      <div class="checkout-actions">
+        <button
+          class="btn-secondary"
+          (click)="previousStep()"
+          [disabled]="currentStep === 1"
+        >
+          ← Atrás
+        </button>
+        <button
+          class="btn-primary"
+          (click)="nextStep()"
+          [disabled]="isLoading"
+        >
+          <span *ngIf="currentStep < totalSteps">Siguiente →</span>
+          <span *ngIf="currentStep === totalSteps">
+            <span *ngIf="!isLoading">Confirmar Pago</span>
+            <span *ngIf="isLoading">Procesando...</span>
+          </span>
+        </button>
+        <button
+          class="btn-cancel"
+          (click)="cancelCheckout()"
+          [disabled]="isLoading"
+        >
+          Cancelar
+        </button>
+      </div>
+    </div>
+
+    <!-- Columna derecha: Resumen de Orden -->
+    <aside class="order-summary">
+      <h3>Resumen de Orden</h3>
+
+      <!-- Items en el carrito -->
+      <div class="summary-items">
+        <div class="summary-item" *ngFor="let item of (cartItems$ | async)">
+          <div class="item-info">
+            <span class="item-name">{{ item.product.name || 'Producto' }}</span>
+            <span class="item-qty">x{{ item.quantity }}</span>
+          </div>
+          <span class="item-price">${{ (item.price * item.quantity).toFixed(2) }}</span>
+        </div>
+      </div>
+
+      <hr />
+
+      <!-- Totales -->
+      <div class="summary-total">
+        <div class="total-row">
+          <span>Subtotal:</span>
+          <span>${{ orderSummary.subtotal.toFixed(2) }}</span>
+        </div>
+        <div class="total-row">
+          <span>Envío:</span>
+          <span>${{ orderSummary.shipping.toFixed(2) }}</span>
+        </div>
+        <div class="total-row">
+          <span>Impuestos (16%):</span>
+          <span>${{ orderSummary.tax.toFixed(2) }}</span>
+        </div>
+        <div class="total-row total">
+          <span>Total:</span>
+          <span>${{ orderSummary.total.toFixed(2) }}</span>
+        </div>
+      </div>
+
+      <!-- Información de seguridad -->
+      <div class="security-info">
+        <p>🔒 Tus datos de pago están seguros y encriptados</p>
+      </div>
+    </aside>
+  </div>
+</div>
