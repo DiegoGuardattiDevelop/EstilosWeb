@@ -106,7 +106,7 @@
                                     <div class="product-actions">
                     <div class="quantity-selector" aria-label="Selector de cantidad">
                         <button type="button" class="qty-btn" (click)="decreaseQuantity()" [disabled]="quantity <= 1" aria-label="Disminuir cantidad">−</button>
-                        <input aria-label="Cantidad" class="qty-input" type="number" [value]="quantity" (input)="onQuantityInput($event.target.value)" />
+                        <input aria-label="Cantidad" class="qty-input" type="number" step="1" [value]="quantity" (input)="onQuantityInput($event.target.value)" />
                         <button type="button" class="qty-btn" (click)="increaseQuantity()" [disabled]="(product && quantity >= product.stock) || (isGuest && hasReachedLimit)" aria-label="Aumentar cantidad">+</button>
                     </div>
 

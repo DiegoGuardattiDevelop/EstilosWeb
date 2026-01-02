@@ -25,7 +25,7 @@ export class CartService implements OnDestroy {
   // Configuración
   private readonly API_URL = 'http://localhost:8000/api';
   private readonly STORAGE_KEY = 'cart';
-  private readonly MAX_ITEMS_GUEST = 2;
+  private readonly MAX_ITEMS_GUEST = 1;
   private readonly MAX_QUANTITY_PER_ITEM = 10;
 
   // Estado para prevenir bucles
