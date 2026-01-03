@@ -8,6 +8,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { Product } from '../models/product.model';
 import { CartItem } from '../models/cart-item.model';
 import { AuthService } from './auth.service';
+import { environment } from '../../environments/environment';
 
 interface CartOperationResult {
   success: boolean;
@@ -23,7 +24,7 @@ export class CartService implements OnDestroy {
   private destroy$ = new Subject<void>();
 
   // Configuración
-  private readonly API_URL = 'http://localhost:8000/api';
+  private readonly API_URL = environment.apiUrl.replace('/api', '');
   private readonly STORAGE_KEY = 'cart';
   private readonly MAX_ITEMS_GUEST = 1;
   private readonly MAX_QUANTITY_PER_ITEM = 10;

@@ -7,6 +7,7 @@ import { CartItem } from '../models/cart-item.model';
 import { Observable, Subject } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 import { takeUntil } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-cart',
@@ -136,11 +137,11 @@ export class CartComponent implements OnInit, OnDestroy {
     
     // Si empieza con 'storage/'
     if (imageUrl.startsWith('storage/')) {
-      return `http://localhost:8000/${imageUrl}`;
+      return `${environment.apiUrl.replace('/api', '')}/${imageUrl}`;
     }
     
     // Por defecto, asumir que está en storage
-    return `http://localhost:8000/storage/${imageUrl}`;
+    return `${environment.apiUrl.replace('/api', '')}/storage/${imageUrl}`;
   }
 
   /**

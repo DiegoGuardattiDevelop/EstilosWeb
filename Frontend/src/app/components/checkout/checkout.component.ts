@@ -1,11 +1,13 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subject, takeUntil, Observable } from 'rxjs';
 import { CartService } from '../../services/cart.service';
 import { AuthService } from '../../services/auth.service';
+import { PaymentService } from '../../services/payment.service';
 import { CartItem } from '../../models/cart-item.model';
+import { loadStripe, Stripe, StripeElements, StripeCardElement } from '@stripe/stripe-js';
 
 interface ShippingMethod {
   id: string;
@@ -29,7 +31,7 @@ interface OrderSummary {
   templateUrl: './checkout.component.html',
   styleUrls: ['./checkout.component.scss']
 })
-export class CheckoutComponent implements OnInit, OnDestroy {
+export class CheckoutComponent implements OnInit, OnDestroy, AfterViewInit {
   currentStep = 1;
   totalSteps = 3;
   
@@ -75,11 +77,18 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     total: 0
   };
 
+  // Stripe properties
+  stripe: Stripe | null = null;
+  elements: StripeElements | null = null;
+  cardElement: StripeCardElement | null = null;
+  clientSecret: string = '';
+
   private destroy$ = new Subject<void>();
 
   constructor(
     private cartService: CartService,
     private authService: AuthService,
+    private paymentService: PaymentService,
     private router: Router,
     private fb: FormBuilder
   ) {
@@ -89,6 +98,10 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.initializeForms();
     this.calculateOrderSummary();
+  }
+
+  ngAfterViewInit() {
+    this.initializeStripe();
   }
 
   private initializeForms() {
@@ -131,6 +144,15 @@ export class CheckoutComponent implements OnInit, OnDestroy {
           });
         }
       });
+  }
+
+  private async initializeStripe() {
+    this.stripe = await this.paymentService.getStripe();
+    if (this.stripe) {
+      this.elements = this.stripe.elements();
+      this.cardElement = this.elements.create('card');
+      this.cardElement.mount('#card-element');
+    }
   }
 
   private calculateOrderSummary() {
@@ -183,37 +205,71 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     }
   }
 
-  submitOrder() {
-    if (!this.paymentForm.valid) {
-      this.paymentAttempted = true;
-      this.errorMessage = 'Por favor completa los datos de pago';
+  async submitOrder() {
+    if (!this.stripe || !this.cardElement) {
+      this.errorMessage = 'Error de configuración de pago';
       return;
     }
 
     this.isLoading = true;
     this.errorMessage = '';
 
-    // Simular envío de orden al backend
-    setTimeout(() => {
-      const orderData = {
-        shipping: this.shippingForm.value,
-        payment: this.paymentForm.value,
-        items: [], // Se llenarían con los items del carrito
-        total: this.orderSummary.total
-      };
+    try {
+      // Crear PaymentIntent
+      const paymentIntentResponse = await this.paymentService.createPaymentIntent(this.orderSummary.total).toPromise();
+      this.clientSecret = paymentIntentResponse.clientSecret;
 
-      console.log('Orden enviada:', orderData);
-
-      // Limpiar carrito
-      this.cartService.clearCart();
-
-      // Redirigir a confirmación
-      this.router.navigate(['/order-confirmation'], {
-        queryParams: { orderId: 'ORD-' + Date.now() }
+      // Confirmar pago con Stripe
+      const { error, paymentIntent } = await this.stripe.confirmCardPayment(this.clientSecret, {
+        payment_method: {
+          card: this.cardElement,
+          billing_details: {
+            name: this.shippingForm.value.firstName + ' ' + this.shippingForm.value.lastName,
+            email: this.shippingForm.value.email,
+            phone: this.shippingForm.value.phone,
+            address: {
+              line1: this.shippingForm.value.address,
+              city: this.shippingForm.value.city,
+              state: this.shippingForm.value.state,
+              postal_code: this.shippingForm.value.zipCode,
+              country: 'MX' // Cambiar según el país
+            }
+          }
+        }
       });
 
-      this.isLoading = false;
-    }, 2000);
+      if (error) {
+        this.errorMessage = error.message || 'Error en el pago';
+        this.isLoading = false;
+        return;
+      }
+
+      if (paymentIntent.status === 'succeeded') {
+        // Enviar orden al backend
+        const orderData = {
+          shipping: this.shippingForm.value,
+          paymentIntentId: paymentIntent.id,
+          items: [], // TODO: Llenar con items del carrito
+          total: this.orderSummary.total
+        };
+
+        // TODO: Enviar al backend
+        console.log('Orden completada:', orderData);
+
+        // Limpiar carrito
+        this.cartService.clearCart();
+
+        // Redirigir a confirmación
+        this.router.navigate(['/order-confirmation'], {
+          queryParams: { orderId: 'ORD-' + Date.now() }
+        });
+      }
+    } catch (error) {
+      this.errorMessage = 'Error procesando el pago';
+      console.error('Payment error:', error);
+    }
+
+    this.isLoading = false;
   }
 
   cancelCheckout() {

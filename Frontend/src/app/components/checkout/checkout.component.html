@@ -236,78 +236,28 @@
       <!-- PASO 3: Pago -->
       <div class="step-content" *ngIf="currentStep === 3">
         <h2>Información de Pago</h2>
-        <form [formGroup]="paymentForm">
-          <!-- Nombre del Titular -->
-          <div class="form-group">
-            <label for="cardName">Nombre del Titular</label>
-            <input
-              id="cardName"
-              type="text"
-              formControlName="cardName"
-              [class.is-invalid]="isFieldInvalid('cardName', paymentForm)"
-              placeholder="Juan Pérez"
-            />
-            <span class="error-text" *ngIf="isFieldInvalid('cardName', paymentForm)">
-              {{ getFieldError('cardName', paymentForm) }}
-            </span>
-          </div>
 
-          <!-- Número de Tarjeta -->
-          <div class="form-group">
-            <label for="cardNumber">Número de Tarjeta</label>
-            <input
-              id="cardNumber"
-              type="text"
-              formControlName="cardNumber"
-              [class.is-invalid]="isFieldInvalid('cardNumber', paymentForm)"
-              placeholder="1234 5678 9012 3456"
-              maxlength="16"
-            />
-            <span class="error-text" *ngIf="isFieldInvalid('cardNumber', paymentForm)">
-              {{ getFieldError('cardNumber', paymentForm) }}
-            </span>
-          </div>
+        <!-- Stripe Card Element -->
+        <div class="form-group">
+          <label for="card-element">Información de la Tarjeta</label>
+          <div id="card-element" class="stripe-card-element"></div>
+          <div id="card-errors" class="error-text" role="alert"></div>
+        </div>
 
-          <!-- Fecha de Expiración y CVV -->
-          <div class="form-row">
-            <div class="form-group">
-              <label for="expiryDate">Fecha de Expiración</label>
-              <input
-                id="expiryDate"
-                type="text"
-                formControlName="expiryDate"
-                [class.is-invalid]="isFieldInvalid('expiryDate', paymentForm)"
-                placeholder="MM/YY"
-                maxlength="5"
-              />
-              <span class="error-text" *ngIf="isFieldInvalid('expiryDate', paymentForm)">
-                {{ getFieldError('expiryDate', paymentForm) }}
-              </span>
-            </div>
-            <div class="form-group">
-              <label for="cvv">CVV</label>
-              <input
-                id="cvv"
-                type="text"
-                formControlName="cvv"
-                [class.is-invalid]="isFieldInvalid('cvv', paymentForm)"
-                placeholder="123"
-                maxlength="4"
-              />
-              <span class="error-text" *ngIf="isFieldInvalid('cvv', paymentForm)">
-                {{ getFieldError('cvv', paymentForm) }}
-              </span>
-            </div>
-          </div>
-
-          <!-- Dirección de Facturación -->
-          <div class="form-group">
-            <label for="billingAddress">
-              <input type="checkbox" id="billingAddress" formControlName="billingAddress" />
-              La dirección de facturación es igual a la de envío
-            </label>
-          </div>
-        </form>
+        <!-- Nombre del Titular (para Stripe) -->
+        <div class="form-group">
+          <label for="cardName">Nombre del Titular</label>
+          <input
+            id="cardName"
+            type="text"
+            formControlName="cardName"
+            [class.is-invalid]="isFieldInvalid('cardName', paymentForm)"
+            placeholder="Juan Pérez"
+          />
+          <span class="error-text" *ngIf="isFieldInvalid('cardName', paymentForm)">
+            {{ getFieldError('cardName', paymentForm) }}
+          </span>
+        </div>
       </div>
 
       <!-- Botones de acción -->

@@ -6,6 +6,7 @@ import { catchError, tap } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
 import { User } from '../models/user.model';    
+import { environment } from '../../environments/environment';    
 
 
 export interface AuthResponse {
@@ -20,7 +21,7 @@ export interface AuthResponse {
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:8000/api';
+  private apiUrl = environment.apiUrl;
 
   // Observable para el estado de autenticación
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(this.hasToken());

@@ -8,6 +8,7 @@ import { Observable, Subject, EMPTY } from 'rxjs';
 import { ProductService, PaginatedProductsResponse } from '../services/product.service';
 import { CategoryService, Category } from '../services/category.service';
 import { Location } from '@angular/common';
+import { environment } from '../../environments/environment';
 import { CartService } from '../services/cart.service';
 import { AuthService } from '../services/auth.service';
 import { CartItem } from '../models/cart-item.model';
@@ -248,10 +249,10 @@ export class ProductsByCategoryComponent implements OnInit, OnDestroy {
     }
     
     if (imageUrl.startsWith('storage/')) {
-      return `http://localhost:8000/${imageUrl}`;
+      return `${environment.apiUrl.replace('/api', '')}/${imageUrl}`;
     }
     
-    return `http://localhost:8000/storage/${imageUrl}`;
+    return `${environment.apiUrl.replace('/api', '')}/storage/${imageUrl}`;
   }
 
   // ✅ Métodos helper para el carrito (opcionales, para mejor manejo de datos)

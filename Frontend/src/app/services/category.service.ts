@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
 import { tap, catchError, shareReplay, map } from 'rxjs/operators'; // Se agregó 'map'
+import { environment } from '../../environments/environment';
 
 export interface Category {
   id: number;
@@ -19,7 +20,7 @@ export interface Category {
   providedIn: 'root'
 })
 export class CategoryService {
-  private apiUrl = 'http://localhost:8000/api/categories';
+  private apiUrl = `${environment.apiUrl}/categories`;
   private cache$: Observable<Category[]> | null = null;
 
   constructor(private http: HttpClient) {}

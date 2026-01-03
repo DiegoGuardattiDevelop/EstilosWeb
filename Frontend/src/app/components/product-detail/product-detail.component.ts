@@ -11,6 +11,7 @@ import { Product } from '../../models/product.model';
 import { CartService } from '../../services/cart.service';
 import { AuthService } from '../../services/auth.service';
 import { CartItem } from '../../models/cart-item.model';
+import { environment } from '../../../environments/environment';
 
 interface Category {
   id: number;
@@ -220,10 +221,10 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     }
 
     if (imageUrl.startsWith('storage/')) {
-      return `http://localhost:8000/${imageUrl}`;
+      return `${environment.apiUrl.replace('/api', '')}/${imageUrl}`;
     }
 
-    return `http://localhost:8000/storage/${imageUrl}`;
+    return `${environment.apiUrl.replace('/api', '')}/storage/${imageUrl}`;
   }
 
   ngOnDestroy(): void {

@@ -4,6 +4,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 import { Product } from '../models/product.model';
+import { environment } from '../../environments/environment';
 /**
  * Interface que representa un producto.
  * Asegúrate de que las propiedades coincidan con la estructura de tu API.
@@ -50,7 +51,7 @@ export interface PaginatedProductsResponse {
 })
 export class ProductService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:8000/api/products';
+  private apiUrl = `${environment.apiUrl}/products`;
 
   /**
    * Obtiene un producto individual por su slug.
