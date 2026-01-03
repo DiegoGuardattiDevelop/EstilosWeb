@@ -1,8 +1,9 @@
-import { Component, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subject, takeUntil, Observable } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 import { CartService } from '../../services/cart.service';
 import { AuthService } from '../../services/auth.service';
 import { PaymentService } from '../../services/payment.service';
@@ -83,6 +84,9 @@ export class CheckoutComponent implements OnInit, OnDestroy, AfterViewInit {
   cardElement: StripeCardElement | null = null;
   clientSecret: string = '';
 
+  // Referencia al elemento DOM de Stripe
+  @ViewChild('cardElement') cardElementRef!: ElementRef;
+
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -90,7 +94,8 @@ export class CheckoutComponent implements OnInit, OnDestroy, AfterViewInit {
     private authService: AuthService,
     private paymentService: PaymentService,
     private router: Router,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private http: HttpClient
   ) {
     this.cartItems$ = this.cartService.getCartItems();
   }
@@ -101,7 +106,10 @@ export class CheckoutComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    this.initializeStripe();
+    // Asegurar que el DOM esté listo antes de montar Stripe
+    setTimeout(() => {
+      this.initializeStripe();
+    }, 100);
   }
 
   private initializeForms() {
@@ -151,7 +159,10 @@ export class CheckoutComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.stripe) {
       this.elements = this.stripe.elements();
       this.cardElement = this.elements.create('card');
-      this.cardElement.mount('#card-element');
+      // Montar el elemento en el contenedor correcto
+      if (this.cardElementRef && this.cardElementRef.nativeElement) {
+        this.cardElement.mount(this.cardElementRef.nativeElement);
+      }
     }
   }
 
@@ -245,16 +256,32 @@ export class CheckoutComponent implements OnInit, OnDestroy, AfterViewInit {
       }
 
       if (paymentIntent.status === 'succeeded') {
+        // Obtener items del carrito
+        const cartItems = await this.cartItems$.toPromise();
+        const orderItems = cartItems?.map(item => ({
+          product_id: item.product_id,
+          quantity: item.quantity,
+          price: item.price
+        })) || [];
+
         // Enviar orden al backend
         const orderData = {
           shipping: this.shippingForm.value,
           paymentIntentId: paymentIntent.id,
-          items: [], // TODO: Llenar con items del carrito
+          items: orderItems,
           total: this.orderSummary.total
         };
 
-        // TODO: Enviar al backend
-        console.log('Orden completada:', orderData);
+        // Enviar al backend
+        try {
+          const response = await this.http.post('/api/orders', orderData).toPromise();
+          console.log('Orden creada exitosamente:', response);
+        } catch (error) {
+          console.error('Error al crear la orden:', error);
+          this.errorMessage = 'Error al procesar tu orden';
+          this.isLoading = false;
+          return;
+        }
 
         // Limpiar carrito
         this.cartService.clearCart();

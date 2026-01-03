@@ -1,0 +1,24 @@
+<!-- Formulario de Pago con formGroup -->
+<form [formGroup]="paymentForm">
+  <!-- Stripe Card Element -->
+  <div class="form-group">
+    <label for="card-element">Información de la Tarjeta</label>
+    <div id="card-element" class="stripe-card-element"></div>
+    <div id="card-errors" class="error-text" role="alert"></div>
+  </div>
+
+  <!-- Nombre del Titular (para Stripe) -->
+  <div class="form-group">
+    <label for="cardName">Nombre del Titular</label>
+    <input
+      id="cardName"
+      type="text"
+      formControlName="cardName"
+      [class.is-invalid]="isFieldInvalid('cardName', paymentForm)"
+      placeholder="Juan Pérez"
+    />
+    <span class="error-text" *ngIf="isFieldInvalid('cardName', paymentForm)">
+      {{ getFieldError('cardName', paymentForm) }}
+    </span>
+  </div>
+</form>

@@ -9,6 +9,7 @@ import { ProductsByCategoryComponent } from './products-by-category/products-by-
 import { ProductDetailComponent } from './components/product-detail/product-detail.component';
 import { CartComponent } from './cart/cart.component';
 import { CheckoutComponent } from './components/checkout/checkout.component';
+import { OrderConfirmationComponent } from './components/order-confirmation/order-confirmation.component';
 import { FormsModule } from '@angular/forms';
 export const routes: Routes = [
   // Ruta de bienvenida, que será la primera que se vea.
@@ -23,7 +24,7 @@ export const routes: Routes = [
   { path: 'cart/:slug', component: CartComponent }, // Ruta del carrito con slug opcional
   { path: 'cart', component: CartComponent },
   { path: 'checkout', component: CheckoutComponent, canActivate: [AuthGuard] },
-  { path: 'order-confirmation', component: HomeComponent }, // Temporalmente redirige a home, crear OrderConfirmationComponent después
+  { path: 'order-confirmation', component: OrderConfirmationComponent },
   // Rutas de autenticación.
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },

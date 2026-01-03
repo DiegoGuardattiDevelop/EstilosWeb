@@ -237,27 +237,38 @@
       <div class="step-content" *ngIf="currentStep === 3">
         <h2>Información de Pago</h2>
 
-        <!-- Stripe Card Element -->
-        <div class="form-group">
-          <label for="card-element">Información de la Tarjeta</label>
-          <div id="card-element" class="stripe-card-element"></div>
-          <div id="card-errors" class="error-text" role="alert"></div>
-        </div>
-
-        <!-- Nombre del Titular (para Stripe) -->
-        <div class="form-group">
-          <label for="cardName">Nombre del Titular</label>
-          <input
-            id="cardName"
-            type="text"
-            formControlName="cardName"
-            [class.is-invalid]="isFieldInvalid('cardName', paymentForm)"
-            placeholder="Juan Pérez"
-          />
-          <span class="error-text" *ngIf="isFieldInvalid('cardName', paymentForm)">
-            {{ getFieldError('cardName', paymentForm) }}
-          </span>
-        </div>
+        <!-- CORREGIR ESTO: Formulario con formGroup -->
+        <form [formGroup]="paymentForm" (ngSubmit)="submitOrder()">
+          
+          <!-- Datos del usuario -->
+          <div class="form-group">
+            <label for="cardName">Nombre en la tarjeta</label>
+            <input 
+              type="text" 
+              id="cardName" 
+              formControlName="cardName"
+              class="form-control"
+              placeholder="Ej: Juan Pérez">
+          </div>
+          
+          <!-- Elemento Stripe -->
+          <div class="form-group">
+            <label for="card-element">Tarjeta de crédito</label>
+            <!-- AQUÍ está el problema: usa #cardElement en lugar de id="card-element" -->
+            <div #cardElement id="card-element-container"></div>
+            <small class="form-text text-muted">
+              Los datos de la tarjeta se procesan de forma segura con Stripe
+            </small>
+          </div>
+          
+          <!-- Botón de pago -->
+          <button 
+            type="submit" 
+            class="btn btn-primary btn-block"
+            [disabled]="!paymentForm.valid || isLoading">
+            {{ isLoading ? 'Procesando...' : 'Pagar $' + orderSummary.total }}
+          </button>
+        </form>
       </div>
 
       <!-- Botones de acción -->
