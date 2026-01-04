@@ -1,137 +1,180 @@
-$primary-color: #000;
-$secondary-color: #f0f0f0;
-$accent-color: #ff6b6b;
-$text-color: #333;
-$border-color: #e0e0e0;
-$transition: all 0.3s ease;
-
-@use 'sass:color';
-
-// ==================== NAVBAR CONTAINER ====================
+/* Navbar Component Styles - Nueva Paleta con Beige #eaccad */
 .navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.98); /* Blanco puro con ligera transparencia */
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(152, 149, 145, 0.3); /* Beige más oscuro / sombra suave */
+  z-index: 1000;
+  padding: 0;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem 2rem;
-  background-color: white;
-  border-bottom: 1px solid $border-color;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  position: sticky;
-  top: 0;
-  z-index: 1100;
-  gap: 1rem;
-
-  @media (max-width: 768px) {
-    padding: 1rem;
-  }
+  height: 70px;
 }
 
-// ==================== NAVBAR BRAND / LOGO ====================
-.navbar-brand {
+.nav-logo h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #000000; /* Negro */
+  margin: 0;
+}
+
+.nav-links {
+  display: flex;
+  gap: 2rem;
+}
+
+.nav-link {
+  color: #383838; /* Gris oscuro */
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s;
+}
+
+.nav-link:hover {
+  color: #eaccad; /* Beige principal */
+}
+
+.nav-search {
   display: flex;
   align-items: center;
-  flex-shrink: 0;
-
-  .logo {
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: $primary-color;
-  }
-
-  .logo-text {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: $primary-color;
-    letter-spacing: -0.5px;
-  }
+  gap: 0.5rem;
 }
 
-// ==================== NAVIGATION MENU ====================
-.nav-menu {
+.search-input {
+  padding: 0.5rem 1rem;
+  border: 1px solid #E7E7E7; /* Gris claro */
+  border-radius: 25px;
+  outline: none;
+  font-size: 0.9rem;
+  width: 200px;
+  background: #FFFFFF; /* Blanco puro */
+}
+
+.search-input:focus {
+  border-color: #eaccad; /* Beige principal */
+  box-shadow: 0 0 0 2px rgba(234, 204, 173, 0.2);
+}
+
+.search-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #666;
+  padding: 0.5rem;
+}
+
+.nav-contact {
   display: flex;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  gap: 0;
-  flex: 1;
-
-  .nav-item {
-    position: relative;
-    margin: 0;
-  }
-
-  .nav-link {
-    display: block;
-    padding: 0.5rem 1rem;
-    text-decoration: none;
-    color: $text-color;
-    font-weight: 500;
-    transition: $transition;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    border-bottom: 3px solid transparent;
-    font-size: 1rem;
-
-    &:hover {
-      color: $accent-color;
-      border-bottom-color: $accent-color;
-    }
-
-    &.active {
-      color: $accent-color;
-      border-bottom-color: $accent-color;
-    }
-  }
-
-  // Mobile menu
-  @media (max-width: 768px) {
-    position: fixed;
-    top: 60px;
-    left: 0;
-    flex-direction: column;
-    width: 100%;
-    background-color: white;
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.3s ease;
-    z-index: 1200;
-
-    &.active {
-      max-height: 600px;
-      overflow-y: auto;
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-    }
-
-    .nav-item {
-      border-bottom: 1px solid $border-color;
-
-      .nav-link {
-        padding: 1rem;
-      }
-    }
-  }
+  align-items: center;
+  gap: 0.5rem;
 }
 
-// ==================== DROPDOWN MENU ====================
+.phone-link {
+  color: #383838; /* Gris oscuro */
+  text-decoration: none;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.cart-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  color: #383838; /* Gris oscuro */
+}
+
+.user-menu {
+  position: relative;
+}
+
+.user-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #eaccad; /* Beige principal */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #000000; /* Negro */
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.user-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: #FFFFFF; /* Blanco puro */
+  border: 1px solid #E7E7E7; /* Gris claro */
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  min-width: 200px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.3s;
+}
+
+.user-dropdown.open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.user-dropdown button {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  color: #383838; /* Gris oscuro */
+  transition: background-color 0.3s;
+}
+
+.user-dropdown button:hover {
+  background: #E7E7E7; /* Gris claro */
+}
+
+.login-btn {
+  background: #eaccad; /* Beige principal */
+  color: #000000; /* Negro */
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 25px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.3s;
+}
+
+.login-btn:hover {
+  background: #989591; /* Beige más oscuro / sombra suave */
+}
+
+/* Dropdown Menu */
 .dropdown {
   position: relative;
-
-  &:hover > .dropdown-menu {
-    @media (min-width: 769px) {
-      opacity: 1;
-      visibility: visible;
-      transform: translateY(0);
-    }
-  }
-
-  &.open > .dropdown-menu {
-    @media (max-width: 768px) {
-      display: block !important;
-    }
-  }
 }
 
 .dropdown-toggle {
@@ -139,426 +182,60 @@ $transition: all 0.3s ease;
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 1rem;
+  color: #383838; /* Gris oscuro */
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
 
-  .caret {
-    font-size: 0.8rem;
-    transition: $transition;
-  }
+.dropdown-toggle:hover {
+  color: #eaccad; /* Beige principal */
 }
 
 .dropdown-menu {
   position: absolute;
   top: 100%;
   left: 0;
-  background-color: white;
-  min-width: 180px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-  border-radius: 4px;
+  background: #FFFFFF; /* Blanco puro */
+  border: 1px solid #E7E7E7; /* Gris claro */
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  min-width: 200px;
   opacity: 0;
   visibility: hidden;
   transform: translateY(-10px);
-  transition: $transition;
-  z-index: 10;
-  display: none;
-
-  @media (max-width: 768px) {
-    position: static;
-    background-color: $secondary-color;
-    box-shadow: none;
-    opacity: 1;
-    visibility: visible;
-    transform: none;
-    min-width: 100%;
-  }
-
-  .dropdown-item {
-    display: block;
-    padding: 0.75rem 1.5rem;
-    text-decoration: none;
-    color: $text-color;
-    white-space: nowrap;
-    transition: $transition;
-    width: 100%;
-    text-align: left;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    font-size: 0.9rem;
-
-    &:hover {
-      background-color: $secondary-color;
-      color: $accent-color;
-    }
-
-    @media (max-width: 768px) {
-      padding: 1rem 1.5rem;
-      font-size: 0.95rem;
-    }
-  }
+  transition: all 0.3s;
+  z-index: 1000;
 }
 
-// ==================== SEARCH BAR ====================
-.search-container {
-  position: relative;
-  flex: 0 1 250px;
-
-  @media (max-width: 1024px) {
-    flex: 0 1 180px;
-  }
-
-  @media (max-width: 768px) {
-    flex: 0 1 100%;
-    position: fixed;
-    top: 60px;
-    left: 0;
-    right: 0;
-    background-color: $secondary-color;
-    padding: 0.5rem 1rem;
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.3s ease;
-
-    &.active {
-      max-height: 300px;
-    }
-  }
+.dropdown-menu.open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
 }
 
-.search-form {
-  display: flex;
-  align-items: center;
-  border: 1px solid $border-color;
-  border-radius: 4px;
-  background-color: $secondary-color;
-  transition: $transition;
-
-  &:focus-within {
-    border-color: $accent-color;
-    box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
-  }
-}
-
-.search-input {
-  flex: 1;
-  border: none;
-  background: transparent;
-  padding: 0.5rem 1rem;
-  font-size: 0.9rem;
-  outline: none;
-  color: $text-color;
-
-  &::placeholder {
-    color: #999;
-  }
-}
-
-.search-btn {
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  padding: 0.5rem 1rem;
-  font-size: 1rem;
-  transition: $transition;
-
-  &:hover {
-    color: $accent-color;
-  }
-}
-
-.search-results {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  background-color: white;
-  border: 1px solid $border-color;
-  border-top: none;
-  max-height: 300px;
-  overflow-y: auto;
-  z-index: 10;
-  border-radius: 0 0 4px 4px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.search-result-item {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
+.dropdown-item {
+  display: block;
   padding: 0.75rem 1rem;
-  cursor: pointer;
-  transition: $transition;
-  border-bottom: 1px solid $border-color;
-
-  &:last-child {
-    border-bottom: none;
-  }
-
-  &:hover {
-    background-color: $secondary-color;
-  }
-
-  img {
-    width: 40px;
-    height: 40px;
-    object-fit: cover;
-    border-radius: 3px;
-  }
-}
-
-.result-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.result-name {
-  display: block;
-  font-weight: 500;
-  color: $text-color;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.result-price {
-  display: block;
-  font-size: 0.85rem;
-  color: #999;
-}
-
-.search-loading {
-  padding: 1rem;
-  text-align: center;
-  color: #999;
-  font-size: 0.9rem;
-}
-
-// ==================== NAVBAR ACTIONS ====================
-.navbar-actions {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-
-  @media (max-width: 768px) {
-    gap: 0.5rem;
-  }
-}
-
-// ==================== CART ICON ====================
-.cart-icon {
-  position: relative;
+  color: #383838; /* Gris oscuro */
   text-decoration: none;
-  font-size: 1.25rem;
-  cursor: pointer;
-  transition: $transition;
-  display: flex;
-  align-items: center;
-  color: $text-color;
-
-  &:hover {
-    color: $accent-color;
-  }
-
-  .cart-icon-svg {
-    display: block;
-  }
+  transition: background-color 0.3s;
+  border-bottom: 1px solid #E7E7E7; /* Gris claro */
 }
 
-.cart-count {
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  background-color: $accent-color;
-  color: white;
-  border-radius: 50%;
-  width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.75rem;
-  font-weight: 700;
+.dropdown-item:last-child {
+  border-bottom: none;
 }
 
-// ==================== USER MENU ====================
-.user-menu {
-  position: relative;
+.dropdown-item:hover {
+  background: #E7E7E7; /* Gris claro */
+  color: #eaccad; /* Beige principal */
 }
 
-.user-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  color: $text-color;
-  font-weight: 500;
-  transition: $transition;
-  padding: 0;
-  font-size: 0.95rem;
-
-  &:hover {
-    color: $accent-color;
-  }
-
-  .user-icon {
-    font-size: 1.25rem;
-  }
-
-  .user-name {
-    max-width: 100px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-
-    @media (max-width: 640px) {
-      display: none;
-    }
-  }
-}
-
-.user-dropdown {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  background-color: white;
-  min-width: 180px;
-  border: 1px solid $border-color;
-  border-radius: 4px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-  z-index: 10;
-  overflow: hidden;
-
-  .dropdown-item,
-  .logout-btn {
-    display: block;
-    width: 100%;
-    text-align: left;
-    padding: 0.75rem 1rem;
-    border: none;
-    background: transparent;
-    color: $text-color;
-    text-decoration: none;
-    cursor: pointer;
-    transition: $transition;
-    font-size: 0.9rem;
-
-    &:hover {
-      background-color: $secondary-color;
-      color: $accent-color;
-    }
-  }
-
-  hr {
-    border: none;
-    border-top: 1px solid $border-color;
-    margin: 0;
-  }
-
-  .logout-btn {
-    color: $accent-color;
-    font-weight: 600;
-
-    &:hover {
-      background-color: #ffe0e0;
-    }
-  }
-}
-
-// ==================== AUTH BUTTONS ====================
-.auth-buttons {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-
-  @media (max-width: 768px) {
-    display: none;
-  }
-}
-
-.btn {
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  font-weight: 600;
-  font-size: 0.9rem;
-  border: 2px solid;
-  cursor: pointer;
-  transition: $transition;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  white-space: nowrap;
-
-  &:focus {
-    outline: none;
-  }
-}
-
-.btn-login {
-  color: $primary-color;
-  background-color: transparent;
-  border-color: $primary-color;
-
-  &:hover {
-    background-color: $primary-color;
-    color: white;
-  }
-}
-
-.btn-register {
-  color: white;
-  background-color: $accent-color;
-  border-color: $accent-color;
-
-  &:hover {
-    background-color: color.adjust($accent-color, $lightness: -10%);
-    border-color: color.adjust($accent-color, $lightness: -10%);
-  }
-}
-
-// Mobile auth buttons inside menu
-.auth-mobile {
-  @media (max-width: 768px) {
-    display: flex !important;
-    flex-direction: column;
-    gap: 0.5rem;
-    padding: 1rem;
-    background-color: $secondary-color;
-
-    .btn {
-      width: 100%;
-      padding: 0.75rem 1rem;
-      font-size: 1rem;
-      font-weight: 600;
-    }
-
-    .btn-login {
-      color: $primary-color;
-      background-color: transparent;
-      border-color: $primary-color;
-
-      &:hover {
-        background-color: $primary-color;
-        color: white;
-      }
-    }
-
-    .btn-register {
-      color: white;
-      background-color: $accent-color;
-      border-color: $accent-color;
-
-        &:hover {
-        background-color: color.adjust($accent-color, $lightness: -10%);
-        border-color: color.adjust($accent-color, $lightness: -10%);
-      }
-    }
-  }
-}
-
-// ==================== MOBILE MENU BUTTON ====================
+/* Mobile Menu */
 .mobile-menu-btn {
   display: none;
   flex-direction: column;
@@ -567,38 +244,103 @@ $transition: all 0.3s ease;
   cursor: pointer;
   padding: 0.5rem;
   gap: 5px;
-
-  @media (max-width: 768px) {
-    display: flex;
-    z-index: 1300;
-  }
 }
 
 .hamburger {
   display: flex;
   flex-direction: column;
   gap: 5px;
+}
 
-  span {
-    display: block;
-    width: 25px;
-    height: 3px;
-    background-color: $primary-color;
-    border-radius: 2px;
-    transition: $transition;
+.hamburger span {
+  display: block;
+  width: 25px;
+  height: 3px;
+  background-color: #383838; /* Gris oscuro */
+  border-radius: 2px;
+  transition: all 0.3s;
+}
+
+.hamburger.active span:nth-child(1) {
+  transform: rotate(45deg) translate(10px, 10px);
+}
+
+.hamburger.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(7px, -7px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .nav-links {
+    position: fixed;
+    top: 70px;
+    left: 0;
+    right: 0;
+    background: #FFFFFF; /* Blanco puro */
+    flex-direction: column;
+    padding: 1rem;
+    gap: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 999;
   }
 
-  &.active {
-    span:nth-child(1) {
-      transform: rotate(45deg) translate(10px, 10px);
-    }
+  .nav-links.active {
+    max-height: 500px;
+    overflow-y: auto;
+  }
 
-    span:nth-child(2) {
-      opacity: 0;
-    }
+  .nav-link {
+    padding: 1rem;
+    border-bottom: 1px solid #E7E7E7; /* Gris claro */
+  }
 
-    span:nth-child(3) {
-      transform: rotate(-45deg) translate(7px, -7px);
-    }
+  .nav-search {
+    position: fixed;
+    top: 70px;
+    left: 0;
+    right: 0;
+    background: #E7E7E7; /* Gris claro */
+    padding: 0.5rem 1rem;
+    display: flex;
+    gap: 0.5rem;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    z-index: 998;
+  }
+
+  .nav-search.active {
+    max-height: 100px;
+  }
+
+  .search-input {
+    flex: 1;
+    width: 100%;
+  }
+
+  .mobile-menu-btn {
+    display: flex;
+    z-index: 1000;
+  }
+
+  .auth-buttons {
+    display: flex !important;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: #E7E7E7; /* Gris claro */
+  }
+
+  .btn-login, .btn-register {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
   }
 }

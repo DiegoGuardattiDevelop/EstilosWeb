@@ -1,64 +1,190 @@
-.main-header {
-  position:absolute;
-  top: 0;
-  left: 0;
+/* Estilos globales para el proyecto EstilosWeb */
+
+/* Reset básico */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  font-family: 'Inter', sans-serif;
+  background-color: #383838; /* Gris oscuro - Fondo general */
+  color: #383838; /* Gris oscuro - Texto principal */
+}
+
+/* Estilos para el contenedor principal */
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Estilos para el contenido principal */
+main {
+  flex: 1;
   width: 100%;
-  padding: 15px 0;
-  border-bottom: none; /* Removemos el borde inferior por defecto */
-  z-index: 1000; /* Asegura que esté por encima de otros elementos */
 }
- .container {
-  display: flex;
-  justify-content: space-between;
+
+/* Estilos para botones generales */
+.btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 25px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-flex;
   align-items: center;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding-left: 0; /* Eliminar padding izquierdo */
-  padding-right: 20px;
-  padding-top: 15px;
-  padding-bottom: 15px;
+  justify-content: center;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
 }
 
-  .logo a {
-    font-size: 1.5em; /* Aumenté un poco el tamaño del logo */
-    color: #000;
-    text-decoration: none;
-    font-weight: bold;
-  }
+.btn-primary {
+  background: #25d366; /* WhatsApp verde */
+  color: white;
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+}
 
-  .main-nav ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    align-items: center;
-  }
+.btn-primary:hover {
+  background: #128c7e;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(37, 211, 102, 0.4);
+}
 
-  .main-nav li {
-    margin-left: 20px;
-  }
+.btn-secondary {
+  background: #FFFFFF; /* Blanco puro */
+  color: #383838; /* Gris oscuro */
+  border-color: #eaccad; /* Beige principal */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
 
-  .login-link {
-    color: #000; 
-    text-decoration: none;
-    font-size: 1em;
-    transition: color 0.3s ease;
+.btn-secondary:hover {
+  background: #eaccad; /* Beige principal */
+  color: #000000; /* Negro */
+  border-color: #989591; /* Beige más oscuro */
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
 
-    // &:hover {
-    //   color: #ccc; 
-    // }
-  }
+/* Estilos para formularios */
+.form-control {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #E7E7E7; /* Gris claro */
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background: #FFFFFF; /* Blanco puro */
+  color: #383838; /* Gris oscuro */
+}
 
-  /* Estilos para el header transparente */
-//   &.transparent-header {
-//     background-color: transparent; 
-//   }
-// }
+.form-control:focus {
+  outline: none;
+  border-color: #eaccad; /* Beige principal */
+  box-shadow: 0 0 0 3px rgba(234, 204, 173, 0.2);
+}
 
-.home-page-container {
-//   margin-top: 60px; /* Ajusta este valor según la altura de tu header */
+.form-control.error {
+  border-color: #dc3545; /* Rojo para errores */
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.2);
+}
+
+.error-text {
+  color: #dc3545; /* Rojo para mensajes de error */
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  display: block;
+}
+
+/* Estilos para alertas */
+.alert {
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
   display: flex;
-  flex-direction: row-reverse;
-  min-height: calc(100vh - 60px); 
+  align-items: center;
+  gap: 0.5rem;
 }
 
+.alert-error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.alert-icon {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+/* Estilos para listas */
+ul, ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Estilos para enlaces */
+a {
+  color: #383838; /* Gris oscuro */
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+a:hover {
+  color: #eaccad; /* Beige principal */
+}
+
+/* Estilos para imágenes */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Estilos para accesibilidad */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Estilos para scrollbars (opcional) */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #eaccad;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #989591;
+}
+
+/* Estilos responsivos básicos */
+@media (max-width: 768px) {
+  .container {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+  
+  .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

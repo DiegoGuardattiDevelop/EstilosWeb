@@ -1,99 +1,90 @@
 // src/app/home/home.component.ts
-import { Component, OnInit, OnDestroy, AfterViewInit, ElementRef, ViewChild, HostListener } from '@angular/core';
-import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { Inject, PLATFORM_ID } from '@angular/core';
-import { HttpClientModule } from '@angular/common/http';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { AuthService } from '../services/auth.service';
-import { CategoryService, Category } from '../services/category.service';
 import { Subscription } from 'rxjs';
 
-gsap.registerPlugin(ScrollTrigger);
+interface Category {
+  name: string;
+  slug: string;
+  image: string;
+  products: number;
+}
+
+interface Testimonial {
+  name: string;
+  age: number;
+  message: string;
+  stars: number;
+}
+
+interface Benefit {
+  icon: string;
+  title: string;
+  description: string;
+}
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, HttpClientModule, FormsModule, RouterModule],
+  imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'
 })
-export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
-  @ViewChild('floatingShapes', { static: true }) floatingShapes!: ElementRef;
-  
-  // Propiedades
-  sections: Category[] = [];
-  fixedImageTitle: string = 'Cargando...';
-  fixedImageUrl: string = '/api/placeholder/180/180';
-  fixedImageDescription: string = 'Cargando descripción...';
-  
-  // Estado
-  private isMobile = false;
-  private isLoading = false;
-  private currentSectionIndex: number = -1;
-  
-  // Animaciones
-  private tl: gsap.core.Timeline | null = null;
-  private parallaxElements: HTMLElement[] = [];
-  private scrollTriggers: ScrollTrigger[] = [];
-  
-  // Event listeners
-  private mouseMoveHandlerRef: ((e: MouseEvent) => void) | undefined;
-  private resizeTimeout: any;
+export class HomeComponent implements OnInit, OnDestroy {
+  // Datos mock
+  categories: Category[] = [
+    { name: 'Mujer', slug: 'mujer', image: 'placeholder', products: 250 },
+    { name: 'Hombre', slug: 'hombre', image: 'placeholder', products: 180 },
+    { name: 'Talles Especiales', slug: 'talles-especiales', image: 'placeholder', products: 120 },
+    { name: 'Lencería', slug: 'lenceria', image: 'placeholder', products: 90 },
+    { name: 'Eventos', slug: 'eventos', image: 'placeholder', products: 45 },
+    { name: 'Niños', slug: 'ninos', image: 'placeholder', products: 60 }
+  ];
 
-  // MODAL PROPERTIES
-  showLoginModal: boolean = false;
-  showRegisterModal: boolean = false;
-  credentials = { email: '', password: '' };
-  registerData = { 
-    name: '', 
-    email: '', 
-    password: '', 
-    password_confirmation: '' 
-  };
-  authErrorMessage: string = '';
-  registerError: string = '';
-  loginError: string = '';
-  showRegisterError: boolean = false;
-  showLoginError: boolean = false;
+  testimonials: Testimonial[] = [
+    { name: 'María González', age: 55, message: 'Encontré mi talle perfecto después de años buscando. La atención es excelente.', stars: 5 },
+    { name: 'Carlos Rodríguez', age: 62, message: 'Calidad premium y precios justos. Siempre me asesoran bien.', stars: 5 },
+    { name: 'Ana López', age: 48, message: 'Tienda confiable con 40 años. Nunca me fallaron.', stars: 5 }
+  ];
 
-  // USER MENU PROPERTIES
-  isMenuOpen: boolean = false;
-  isAuthenticated: boolean = false;
+  benefits: Benefit[] = [
+    { icon: 'users', title: 'Todos los talles', description: 'Encontrá tu medida perfecta, desde XS hasta 6XL.' },
+    { icon: 'star', title: 'Calidad premium', description: 'Ropa duradera y cómoda para toda la familia.' },
+    { icon: 'map-pin', title: 'Tienda en Pilar', description: 'Visitá nuestra tienda física en Rafael Nuñez 1081.' },
+    { icon: 'credit-card', title: 'Pago fácil', description: 'Efectivo, transferencia o WhatsApp.' }
+  ];
+
+  // Contacto
+  phone = '0351-1234567';
+  whatsapp = '5493511234567';
+
+  // Usuario
+  isAuthenticated = false;
   user: any = null;
+  isMenuOpen = false;
   private authSubscription!: Subscription;
 
+  // Búsqueda
+  searchQuery = '';
+
   constructor(
-    @Inject(PLATFORM_ID) private platformId: Object,
-    private categoryService: CategoryService,
     private router: Router,
     private authService: AuthService
-  ) { }
+  ) {}
 
-  // ========== LIFECYCLE ==========
   ngOnInit(): void {
-    if (this.isLoading) return;
-    this.isLoading = true;
-    this.loadCategories();
     this.setupAuthListener();
   }
 
-  ngAfterViewInit(): void {
-    if (isPlatformBrowser(this.platformId)) {
-      this.checkScreenSize();
-      this.createFloatingElements(); 
-      this.initializeAnimations();
-      
-      window.addEventListener('resize', this.debouncedHandleResize.bind(this));
-
-      if (!this.isMobile) {
-        this.setupMouseParallax();
-      }
+  ngOnDestroy(): void {
+    if (this.authSubscription) {
+      this.authSubscription.unsubscribe();
     }
   }
-// USER MENU METHODS
+
   private setupAuthListener(): void {
     this.authSubscription = this.authService.isAuthenticated$.subscribe(
       (authenticated) => {
@@ -148,7 +139,6 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     this.authService.logout().subscribe({
       next: () => {
         this.closeMenu();
-        console.log('Sesión cerrada exitosamente');
       },
       error: (error) => {
         console.error('Error al cerrar sesión:', error);
@@ -158,730 +148,39 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   navigateToProfile(): void {
-  console.log('🔄 Navegando al perfil desde el menú...');
-  this.closeMenu();
-  
-  this.router.navigate(['/profile']).then(success => {
-    if (success) {
-      console.log('✅ Navegación al perfil exitosa');
-    } else {
-      console.error('❌ Error navegando al perfil');
-      // Fallback: navegación forzada
-      window.location.href = '/profile';
-    }
-  });
-}
-
-  @HostListener('document:keydown.escape')
-  onEscapePress(): void {
     this.closeMenu();
+    this.router.navigate(['/profile']);
   }
 
-  @HostListener('window:scroll')
-  onWindowScroll(): void {
-    // Cerrar menú al hacer scroll
-    if (this.isMenuOpen) {
-      this.closeMenu();
+  navigateToCategory(slug: string): void {
+    this.router.navigate(['/products-by-category', slug]);
+  }
+
+  onSearch(): void {
+    if (this.searchQuery.trim()) {
+      // Implementar búsqueda
+      console.log('Buscar:', this.searchQuery);
     }
   }
 
-  ngOnDestroy(): void {
-    this.cleanup();
-    // USER MENU CLEANUP
-    if (this.authSubscription) {
-      this.authSubscription.unsubscribe();
+  callPhone(): void {
+    window.location.href = `tel:${this.phone}`;
+  }
+
+  openWhatsApp(): void {
+    const message = encodeURIComponent('Hola, necesito ayuda con mi pedido.');
+    window.open(`https://wa.me/${this.whatsapp}?text=${message}`, '_blank');
+  }
+
+  openWhatsAppCTA(): void {
+    const message = encodeURIComponent('¿Me podés ayudar con un pedido?');
+    window.open(`https://wa.me/${this.whatsapp}?text=${message}`, '_blank');
+  }
+
+  scrollToCategories(): void {
+    const element = document.getElementById('categories');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
     }
   }
-
-  // ========== CARGA DE DATOS ==========
-  private loadCategories(): void {
-    this.categoryService.getCategories().subscribe({
-      next: (data: Category[]) => {
-        this.sections = data;
-        console.log('Categorías cargadas:', this.sections);
-
-        this.updateFixedImageContent();
-
-        if (isPlatformBrowser(this.platformId)) {
-          // Preload images and only after all images attempt to setup scroll effects
-          this.preloadImages().then(() => {
-            // Use requestAnimationFrame to ensure DOM updated
-            requestAnimationFrame(() => {
-              this.setupScrollEffects();
-              this.initializeFirstSection();
-            });
-          }).catch(() => {
-            // If preload fails, still attempt to initialize
-            requestAnimationFrame(() => {
-              this.setupScrollEffects();
-              this.initializeFirstSection();
-            });
-          });
-        }
-        
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Error al obtener categorías:', error);
-        this.handleLoadError();
-        this.isLoading = false;
-      }
-    });
-  }
-
-  private updateFixedImageContent(): void {
-    if (this.sections.length > 0) {
-      this.fixedImageTitle = this.sections[0].name;
-      this.fixedImageUrl = this.sections[0].image_url;
-      this.fixedImageDescription = this.sections[0].description_short;
-    } else {
-      this.fixedImageTitle = 'Sin categorías';
-      this.fixedImageDescription = 'No hay datos disponibles.';
-      this.fixedImageUrl = '/api/placeholder/180/red';
-    }
-  }
-
-  private handleLoadError(): void {
-    this.fixedImageTitle = 'Error al cargar';
-    this.fixedImageDescription = 'Intenta de nuevo más tarde.';
-    this.fixedImageUrl = '/api/placeholder/180/gray';
-  }
-
-  // ========== ANIMACIONES Y EFECTOS ==========
-  private initializeAnimations(): void {
-    this.tl = gsap.timeline();
-
-    // Floating shapes (solo si existen targets)
-    if (document.querySelectorAll('.floating-shape').length > 0) {
-      gsap.fromTo('.floating-shape', 
-        { opacity: 0, scale: 0, rotation: -180 },
-        {
-          opacity: 0.6,
-          scale: 1,
-          rotation: 0,
-          duration: 2,
-          stagger: 0.3,
-          ease: "elastic.out(1, 0.5)"
-        }
-      );
-    }
-
-    // Image content (proteger si no existe el selector)
-    if (document.querySelector('.image-content')) {
-      gsap.fromTo('.image-content',
-        { opacity: 0, y: 50, scale: 0.8 },
-        {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          duration: 1.2,
-          ease: "back.out(1.7)",
-          delay: 0.3
-        }
-      );
-    } else {
-      // Evitar warning de GSAP cuando no hay targets
-      console.warn('GSAP: .image-content no encontrado, omitiendo animación inicial.');
-    }
-  }
-
-  private setupScrollEffects(): void {
-    if (this.isLoading || this.sections.length === 0) return;
-
-    this.destroyScrollEffects();
-
-    const elements = this.getScrollElements();
-    if (!elements) return;
-
-    // Pin effect solo en desktop
-    if (!this.isMobile) {
-      this.createPinEffect(elements);
-    }
-
-    this.createSectionTriggers(elements);
-  }
-
-  private getScrollElements() {
-    const fixedImageWrapper = document.querySelector('.fixed-image-wrapper') as HTMLElement;
-    const mainScrollingContentArea = document.querySelector('.main-scrolling-content-area') as HTMLElement;
-    const imageContent = document.querySelector('.image-content') as HTMLElement;
-    const dynamicImage = document.querySelector('.dynamic-image') as HTMLImageElement;
-    const imageTitle = document.querySelector('.image-title') as HTMLElement;
-    const imageDescription = document.querySelector('.image-description') as HTMLElement;
-
-    if (!fixedImageWrapper || !mainScrollingContentArea || !imageContent || 
-        !dynamicImage || !imageTitle || !imageDescription) {
-      console.warn("Elementos para scroll no encontrados");
-      return null;
-    }
-
-    return { fixedImageWrapper, mainScrollingContentArea, imageContent, dynamicImage, imageTitle, imageDescription };
-  }
-
-  private createPinEffect(elements: any): void {
-    const pinTrigger = ScrollTrigger.create({
-      trigger: elements.mainScrollingContentArea,
-      pin: elements.fixedImageWrapper,
-      start: "top top",
-      end: "bottom bottom",
-      scrub: true,
-    });
-    this.scrollTriggers.push(pinTrigger);
-  }
-
-  private createSectionTriggers(elements: any): void {
-    const contentSections = gsap.utils.toArray<HTMLElement>(".content-section");
-
-    contentSections.forEach((section, index) => {
-      if (index >= this.sections.length) return;
-
-      const sectionTrigger = ScrollTrigger.create({
-        trigger: section,
-        start: this.isMobile ? "top 60%" : "top center",
-        end: this.isMobile ? "bottom 40%" : "bottom center",
-        onEnter: () => this.handleSectionChange(section, elements, index),
-        onEnterBack: () => this.handleSectionChange(section, elements, index)
-      });
-      this.scrollTriggers.push(sectionTrigger);
-    });
-  }
-
-  private handleSectionChange(section: HTMLElement, elements: any, index: number): void {
-    if (this.currentSectionIndex !== index) {
-      this.currentSectionIndex = index;
-      this.animateSectionEntrance(section);
-      this.updateSectionContent(section, elements, index);
-    }
-  }
-
-  private animateSectionEntrance(section: HTMLElement): void {
-    const elements = section.querySelectorAll('h2, p, .view-button');
-    
-    gsap.fromTo(elements, {
-      opacity: 0,
-      y: 30
-    }, {
-      opacity: 1,
-      y: 0,
-      duration: 0.6,
-      stagger: 0.1,
-      ease: "power2.out"
-    });
-  }
-
-  private updateSectionContent(section: HTMLElement, elements: any, index: number): void {
-    const currentSectionData = this.sections[index];
-    if (!currentSectionData) return;
-
-    // Evitar animaciones innecesarias
-    if (elements.dynamicImage.src === currentSectionData.image_url && 
-        elements.imageTitle.textContent === currentSectionData.name) {
-      return;
-    }
-
-    const transitionTl = gsap.timeline();
-
-    transitionTl.to([elements.dynamicImage, elements.imageTitle, elements.imageDescription], {
-      opacity: 0.3,
-      scale: 0.95,
-      duration: 0.3,
-      ease: "power2.inOut"
-    });
-
-    transitionTl.call(() => {
-      elements.dynamicImage.src = currentSectionData.image_url; 
-      elements.imageTitle.textContent = currentSectionData.name; 
-      elements.imageDescription.textContent = currentSectionData.description_short;
-    });
-
-    transitionTl.to([elements.dynamicImage, elements.imageTitle, elements.imageDescription], {
-      opacity: 1,
-      scale: 1,
-      duration: 0.5,
-      ease: "power2.out"
-    });
-
-    this.createRippleEffect(currentSectionData.color); 
-  }
-
-  // ========== EFECTOS VISUALES ==========
-  private createFloatingElements(): void {
-    const shapesContainer = document.querySelector('.floating-shapes');
-    if (!shapesContainer) return;
-
-    shapesContainer.innerHTML = '';
-    const shapeTypes = ['circle', 'triangle', 'square', 'hexagon'];
-    const shapeCount = this.isMobile ? 8 : 12;
-
-    for (let i = 0; i < shapeCount; i++) {
-      const shape = this.createFloatingShape(shapeTypes);
-      shapesContainer.appendChild(shape);
-      this.parallaxElements.push(shape);
-    }
-  }
-
-  private createFloatingShape(shapeTypes: string[]): HTMLDivElement {
-    const shape = document.createElement('div');
-    const shapeType = shapeTypes[Math.floor(Math.random() * shapeTypes.length)];
-    
-    shape.className = `floating-shape floating-shape--${shapeType}`;
-    shape.style.left = `${Math.random() * 100}%`;
-    shape.style.top = `${Math.random() * 100}%`;
-    shape.style.animationDelay = `${Math.random() * 5}s`;
-    shape.style.animationDuration = `${8 + Math.random() * 4}s`;
-    
-    return shape;
-  }
-
-  private setupMouseParallax(): void {
-    if (this.mouseMoveHandlerRef) return;
-
-    // Solo habilitar parallax si existe el target principal
-    if (!document.querySelector('.image-content')) {
-      console.warn('Parallax no inicializado: .image-content no encontrado');
-      return;
-    }
-
-    this.mouseMoveHandlerRef = (e: MouseEvent) => {
-      if (this.isMobile) return;
-
-      const mouseX = e.clientX / window.innerWidth;
-      const mouseY = e.clientY / window.innerHeight;
-
-      this.animateParallax(mouseX, mouseY);
-    };
-
-    document.addEventListener('mousemove', this.mouseMoveHandlerRef);
-  }
-
-  private animateParallax(mouseX: number, mouseY: number): void {
-    // Protegemos la animación si el elemento no existe
-    const imageContent = document.querySelector('.image-content') as HTMLElement | null;
-    if (imageContent) {
-      gsap.to(imageContent, {
-        x: (mouseX - 0.5) * 20,
-        y: (mouseY - 0.5) * 20,
-        duration: 1,
-        ease: "power2.out"
-      });
-    }
-
-    this.parallaxElements.forEach((element, index) => {
-      const speed = (index % 3 + 1) * 0.5;
-      gsap.to(element, {
-        x: (mouseX - 0.5) * 30 * speed,
-        y: (mouseY - 0.5) * 30 * speed,
-        duration: 1.5,
-        ease: "power2.out"
-      });
-    });
-  }
-
-  private createRippleEffect(color: string): void {
-    if (!isPlatformBrowser(this.platformId)) return;
-
-    const ripple = document.createElement('div');
-    ripple.className = 'scroll-ripple';
-    ripple.style.background = `radial-gradient(circle, ${color}40 0%, transparent 70%)`;
-    
-    document.body.appendChild(ripple);
-    
-    gsap.fromTo(ripple, 
-      { scale: 0, opacity: 1, x: window.innerWidth / 2 - 50, y: window.innerHeight / 2 - 50 },
-      {
-        scale: 3, 
-        opacity: 0, 
-        duration: 1.5,
-        ease: "power2.out",
-        onComplete: () => ripple.remove()
-      }
-    );
-  }
-
-  // ========== INTERACCIÓN USUARIO ==========
-  onViewButtonClick(category: Category, event: Event): void {
-    event.preventDefault();
-    const button = event.currentTarget as HTMLElement;
-    
-    this.createButtonRipple(button, event);
-    this.animateButtonClick(button, category);
-  }
-
-  private createButtonRipple(button: HTMLElement, event: Event): void {
-    const ripple = document.createElement('span');
-    ripple.className = 'button-ripple';
-    
-    const rect = button.getBoundingClientRect();
-    const size = Math.max(rect.width, rect.height);
-    const x = event instanceof MouseEvent ? event.clientX - rect.left : rect.width / 2;
-    const y = event instanceof MouseEvent ? event.clientY - rect.top : rect.height / 2;
-    
-    ripple.style.width = ripple.style.height = `${size}px`;
-    ripple.style.left = `${x - size / 2}px`;
-    ripple.style.top = `${y - size / 2}px`;
-    
-    button.appendChild(ripple);
-  }
-
-  private animateButtonClick(button: HTMLElement, category: Category): void {
-    const timeline = gsap.timeline({
-      onComplete: () => this.navigateToCategory(category)
-    });
-    
-    timeline.to(button.querySelector('.button-ripple'), {
-      scale: 2,
-      opacity: 0,
-      duration: 0.6,
-      ease: "power2.out"
-    });
-    
-    timeline.to(button, {
-      scale: 0.95,
-      duration: 0.1,
-      yoyo: true,
-      repeat: 1,
-      ease: "power2.inOut"
-    }, 0);
-  }
-
-  private navigateToCategory(category: Category): void {
-    if (!category.slug) {
-      console.error('Category slug is missing:', category);
-      return;
-    }
-    
-    this.router.navigate(['/products-by-category', category.slug], {
-      state: { categoryData: category, fromHome: true }
-    });
-  }
-
-  scrollProducts(direction: 'left' | 'right'): void {
-    const grid = document.getElementById('productsGrid');
-    if (!grid) return;
-    
-    const scrollAmount = grid.offsetWidth * 0.8;
-    grid.scrollBy({ 
-      left: direction === 'left' ? -scrollAmount : scrollAmount, 
-      behavior: 'smooth' 
-    });
-  }
-
-  // ========== UTILIDADES ==========
-  private preloadImages(): Promise<void> {
-    return new Promise((resolve) => {
-      if (!isPlatformBrowser(this.platformId) || !this.sections || this.sections.length === 0) {
-        resolve();
-        return;
-      }
-
-      const promises: Promise<void>[] = this.sections.map(section => {
-        return new Promise<void>((res) => {
-          const img = new Image();
-          img.onload = () => res();
-          img.onerror = () => res();
-          img.src = section.image_url;
-        });
-      });
-
-      Promise.all(promises).then(() => resolve()).catch(() => resolve());
-    });
-  }
-
-  private checkScreenSize(): void {
-    this.isMobile = window.innerWidth <= 768;
-  }
-
-  private debouncedHandleResize(): void {
-    if (this.resizeTimeout) clearTimeout(this.resizeTimeout);
-    this.resizeTimeout = setTimeout(() => this.handleResize(), 250);
-  }
-
-  private handleResize(): void {
-    const wasMobile = this.isMobile;
-    this.checkScreenSize();
-    
-    if (wasMobile !== this.isMobile) {
-      this.destroyScrollEffects();
-      
-      if (this.sections.length > 0 && !this.isLoading) {
-        requestAnimationFrame(() => this.setupScrollEffects());
-      }
-      
-      this.handleParallaxResize(wasMobile);
-    }
-  }
-
-  private handleParallaxResize(wasMobile: boolean): void {
-    if (!this.isMobile && !this.mouseMoveHandlerRef) {
-      this.setupMouseParallax();
-    } else if (this.isMobile && this.mouseMoveHandlerRef) {
-      document.removeEventListener('mousemove', this.mouseMoveHandlerRef);
-      this.mouseMoveHandlerRef = undefined;
-    }
-  }
-
-  private initializeFirstSection(): void {
-    const firstSectionElement = document.querySelector('.content-section');
-    if (firstSectionElement && this.sections.length > 0) {
-      const elements = this.getScrollElements();
-      if (elements) {
-        this.currentSectionIndex = 0;
-        this.handleSectionChange(firstSectionElement as HTMLElement, elements, 0);
-      }
-    }
-  }
-
-  private destroyScrollEffects(): void {
-    ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-    if (this.tl) {
-      this.tl.kill();
-      this.tl = null;
-    }
-  }
-
-  getSafeClassName(categoryName: string): string {
-    return categoryName
-      .toLowerCase()
-      .normalize('NFD') // Descompone caracteres con acentos
-      .replace(/[\u0300-\u036f]/g, '') // Remueve acentos y tildes
-      .replace(/ñ/g, 'n') // Convierte ñ a n
-      .replace(/[^a-z0-9-_]/g, ''); // Remueve caracteres no válidos para CSS
-  }
-
-  getCurrentCategoryClass(): string {
-    if (this.currentSectionIndex >= 0 && this.sections[this.currentSectionIndex]) {
-      return this.getSafeClassName(this.sections[this.currentSectionIndex].name);
-    }
-    return 'default';
-  }
-
-  private cleanup(): void {
-    if (isPlatformBrowser(this.platformId)) {
-      this.destroyScrollEffects();
-      window.removeEventListener('resize', this.debouncedHandleResize.bind(this));
-      
-      if (this.mouseMoveHandlerRef) {
-        document.removeEventListener('mousemove', this.mouseMoveHandlerRef);
-        this.mouseMoveHandlerRef = undefined;
-      }
-      
-      if (this.resizeTimeout) {
-        clearTimeout(this.resizeTimeout);
-      }
-    }
-  }
-
-  // NUEVAS propiedades para búsqueda
-  searchQuery: string = '';
-  showSuggestions: boolean = false;
-  showPopularSearches: boolean = true;
-  searchSuggestions: string[] = [];
-  popularSearches: string[] = [
-    'camisas', 'vestidos', 'jeans', 'zapatos', 
-    'chaquetas', 'accesorios', 'deportivo'
-  ];
-  
-  private allSearchTerms: string[] = [
-    'camisas hombre', 'camisas mujer', 'vestidos casuales',
-    'vestidos elegantes', 'jeans slim', 'jeans boyfriend',
-    'zapatos deportivos', 'zapatos formales', 'chaquetas cuero',
-    'chaquetas denim', 'accesorios moda', 'ropa deportiva',
-    'blusas', 'pantalones', 'faldas', 'shorts', 'abrigos'
-  ];
-
-  // NUEVOS métodos para búsqueda
-  onSearchInput(event: any): void {
-    const query = event.target.value.toLowerCase().trim();
-    this.searchQuery = query;
-    
-    if (query.length >= 2) {
-      this.searchSuggestions = this.allSearchTerms
-        .filter(term => term.toLowerCase().includes(query))
-        .slice(0, 6);
-      this.showSuggestions = true;
-      this.showPopularSearches = false;
-    } else {
-      this.showSuggestions = false;
-      this.showPopularSearches = true;
-      this.searchSuggestions = [];
-    }
-  }
-
-  onSearchFocus(): void {
-    if (this.searchQuery.length >= 2) {
-      this.showSuggestions = true;
-    } else {
-      this.showPopularSearches = true;
-    }
-  }
-
-  onSearchBlur(): void {
-    // Delay para permitir click en sugerencias
-    setTimeout(() => {
-      this.showSuggestions = false;
-      this.showPopularSearches = false;
-    }, 200);
-  }
-
-  performQuickSearch(): void {
-    if (!this.searchQuery.trim()) return;
-    
-    console.log('Búsqueda:', this.searchQuery);
-    
-    // Aquí puedes navegar a página de resultados
-    // this.router.navigate(['/search'], { 
-    //   queryParams: { q: this.searchQuery.trim() } 
-    // });
-    
-    // O filtrar categorías existentes
-    this.filterCurrentCategories(this.searchQuery.trim());
-    
-    // Limpiar sugerencias
-    this.showSuggestions = false;
-    this.showPopularSearches = false;
-  }
-
-  selectSuggestion(suggestion: string): void {
-    this.searchQuery = suggestion;
-    this.performQuickSearch();
-  }
-
-  selectPopularSearch(tag: string): void {
-    this.searchQuery = tag;
-    this.performQuickSearch();
-  }
-
-  private filterCurrentCategories(query: string): void {
-    // Scroll suave a categorías y destacar coincidencias
-    const categoriesSection = document.querySelector('.main-scrolling-content-area');
-    if (categoriesSection) {
-      categoriesSection.scrollIntoView({ behavior: 'smooth' });
-      
-      // Highlight matching categories
-      setTimeout(() => {
-        this.highlightMatchingCategories(query);
-      }, 800);
-    }
-  }
-
-  private highlightMatchingCategories(query: string): void {
-    const sections = document.querySelectorAll('.content-section');
-    sections.forEach((section) => {
-      const title = section.querySelector('h2')?.textContent?.toLowerCase();
-      const description = section.querySelector('p')?.textContent?.toLowerCase();
-      
-      if (title?.includes(query.toLowerCase()) || 
-          description?.includes(query.toLowerCase())) {
-        section.classList.add('search-highlight');
-        setTimeout(() => {
-          section.classList.remove('search-highlight');
-        }, 3000);
-      }
-    });
-  }
-  // MODAL METHODS
-openLoginModal(): void {
-  this.showLoginModal = true;
-  this.closeMenu();
-  this.authErrorMessage = '';
-}
-
-openRegisterModal(): void {
-  this.showRegisterModal = true;
-  this.closeMenu();
-  this.authErrorMessage = '';
-}
-
-closeModals(): void {
-  this.showLoginModal = false;
-  this.showRegisterModal = false;
-  this.authErrorMessage = '';
-  this.showLoginError = false;
-  this.showRegisterError = false;
-  // Limpiar formularios
-  this.credentials = { email: '', password: '' };
-  this.registerData = { name: '', email: '', password: '', password_confirmation: '' };
-}
-
-// AUTH METHODS
-onLogin(): void {
-  if (!this.credentials.email || !this.credentials.password) {
-    this.authErrorMessage = 'Por favor completa todos los campos';
-    this.showLoginError = true;
-    this.showRegisterError = false;
-    return;
-  }
-
-
-  // Resetear errores
-  this.authErrorMessage = '';
-  this.showLoginError = false;
-  this.showRegisterError = false;
-
-  this.authService.login(this.credentials).subscribe({
-    next: (response) => {
-      console.log('Login exitoso:', response);
-      this.closeModals();
-      this.credentials = { email: '', password: '' };
-      this.authErrorMessage = '';
-      this.showLoginError = false;
-    },
-    error: (error) => {
-      console.error('Error en login:', error);
-      this.authErrorMessage = error.message;
-      this.showLoginError = true;
-      this.showRegisterError = false;
-      
-      // Auto-ocultar error después de 5 segundos
-      setTimeout(() => {
-        this.showLoginError = false;
-        this.authErrorMessage = '';
-      }, 5000);
-    }
-  });
-}
-
-onRegister(): void {
-  if (this.registerData.password !== this.registerData.password_confirmation) {
-    this.authErrorMessage = 'Las contraseñas no coinciden';
-    this.showRegisterError = true;
-    this.showLoginError = false;
-    return;
-  }
-
-  if (!this.registerData.name || !this.registerData.email || !this.registerData.password) {
-    this.authErrorMessage = 'Por favor completa todos los campos';
-    this.showRegisterError = true;
-    this.showLoginError = false;
-    return;
-  }
-
-  // Resetear errores
-  this.authErrorMessage = '';
-  this.showRegisterError = false;
-  this.showLoginError = false;
-
-  this.authService.register(this.registerData).subscribe({
-    next: (response) => {
-      console.log('Registro exitoso:', response);
-      this.closeModals();
-      this.registerData = { name: '', email: '', password: '', password_confirmation: '' };
-      this.authErrorMessage = '';
-      this.showRegisterError = false;
-    },
-    error: (error) => {
-      console.error('Error en registro:', error);
-      this.authErrorMessage = error.message;
-      this.showRegisterError = true;
-      this.showLoginError = false;
-      
-      // Auto-ocultar error después de 5 segundos
-      setTimeout(() => {
-        this.showRegisterError = false;
-        this.authErrorMessage = '';
-      }, 5000);
-    }
-  });
-}
-
 }

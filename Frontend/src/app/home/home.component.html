@@ -1,326 +1,89 @@
-<header class="hero-section">
-    <div class="floating-shapes">
-        <div class="shape circle"></div>
-        <div class="shape square"></div>
-        <div class="shape triangle"></div>
-    </div>
-    
-    <!-- user-flotante retirado: ahora el usuario está en el Navbar -->
+<!-- Hero Section -->
+<section class="hero">
+  <div class="hero-container">
     <div class="hero-content">
-        <img src="./Logo_estilos_pastel.jpg" alt="Estilos Moda" class="hero-logo">
-        <h1 class="hero-title">Descubre tu estilo único</h1>
-        <p class="hero-subtitle">Las últimas tendencias en moda para hombre, mujer y niños</p>   
-        <a href="#categories" class="hero-cta">Explorar Colecciones</a>
-    </div>
-    
-    <div class="hero-search-wrapper">
-        <div class="search-container">
-            <input 
-                type="search" 
-                placeholder="Buscar productos, marcas, estilos..."
-                class="hero-search-input"
-                [(ngModel)]="searchQuery"
-                (input)="onSearchInput($event)"
-                (keyup.enter)="performQuickSearch()"
-                (focus)="onSearchFocus()"
-                (blur)="onSearchBlur()"
-            >
-            <button 
-                class="search-btn" 
-                (click)="performQuickSearch()" 
-                [disabled]="!searchQuery.trim()"
-            >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <path d="m21 21-4.35-4.35"></path>
-                </svg>
-            </button>
-        </div>
-        
-        <!-- Sugerencias de búsqueda -->
-        <div class="search-suggestions" [class.active]="showSuggestions && searchSuggestions.length > 0">
-            <div 
-                *ngFor="let suggestion of searchSuggestions" 
-                (click)="selectSuggestion(suggestion)"
-                class="suggestion-item"
-            >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <path d="m21 21-4.35-4.35"></path>
-                </svg>
-                <span>{{ suggestion }}</span>
-            </div>
-        </div>
-    </div>
-</header>
-
-<div class="home-page-container">
-    <div class="fixed-image-wrapper">
-    <div class="image-content" [ngClass]="getCurrentCategoryClass()">
-        <h3 class="image-title">{{ fixedImageTitle }}</h3>
-        <img class="dynamic-image" [src]="fixedImageUrl" [alt]="fixedImageTitle">
-        <p class="image-description">{{ fixedImageDescription }}</p>
-    </div>
-</div>
-
-    <div class="main-scrolling-content-area">
-        <!-- Grid de Categorías Responsive -->
-        <section *ngFor="let category of sections; let i = index"
-            class="content-section"
-            [ngClass]="getSafeClassName(category.name)"
-            [style.background-color]="category.color"
-            [style.color]="category.text_color"
-            [attr.data-image]="category.image_url"
-            [attr.data-title]="category.name"
-            [attr.data-description]="category.description_short">
-            <div class="section-decoration"></div>
-            <div class="section-content">
-                <h2>{{ category.name }}</h2>
-                <p>{{ category.description_long }}</p>
-                <button class="view-button" (click)="onViewButtonClick(category, $event)">Ver Colección</button>
-            </div>
-        </section>
-    </div>
-</div>
-<!-- Modal Login -->
-<div class="modal-overlay" [class.active]="showLoginModal" (click)="closeModals()">    
-    <div class="auth-container" (click)="$event.stopPropagation()">
-        <button class="modal-close" (click)="closeModals()">
-            <i class="fas fa-times"></i>
+      <h1>Encontrá tu estilo perfecto</h1>
+      <p>Tienda de ropa confiable con 40 años en Pilar. Todos los talles, calidad premium y atención personalizada.</p>
+      <div class="hero-buttons">
+        <button (click)="openWhatsApp()" class="btn-primary">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"/>
+          </svg>
+          Contactanos por WhatsApp
         </button>
-      <div class="auth-header">
-        <h2 class="auth-title">Iniciar Sesión</h2>
-        <p class="auth-subtitle">Ingresa a tu cuenta para continuar</p>
+        <button (click)="scrollToCategories()" class="btn-secondary">
+          Ver Productos
+        </button>
       </div>
-
-      <form class="auth-form" (ngSubmit)="onLogin()">
-        <div class="form-group">
-          <label class="form-label" for="login-email">Email</label>
-          <input 
-            type="email" 
-            id="login-email" 
-            placeholder="Tu email" 
-            [(ngModel)]="credentials.email" 
-            name="loginEmail" 
-            class="form-input" 
-            required
-          >
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="login-password">Contraseña</label>
-          <input 
-            type="password" 
-            id="login-password" 
-            placeholder="Tu contraseña" 
-            [(ngModel)]="credentials.password" 
-            name="loginPassword" 
-            class="form-input" 
-            required
-          >
-        </div>
-
-        <div *ngIf="showLoginError && authErrorMessage" class="error-message show">
-            <i class="fas fa-exclamation-circle"></i>
-            <span>{{ authErrorMessage }}</span>
-            <button class="error-close" (click)="showLoginError = false; authErrorMessage = ''">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-
-        <button type="submit" class="auth-button" [disabled]="!credentials.email || !credentials.password">
-          Iniciar Sesión
-        </button>
-
-        <div class="auth-link">
-          <a href="javascript:void(0)" (click)="closeModals(); openRegisterModal()">
-            ¿No tienes una cuenta? Regístrate ahora
-          </a>
-        </div>
-      </form>
-  </div>
-</div>
-
-<!-- Modal Register -->
-<div class="modal-overlay" [class.active]="showRegisterModal" (click)="closeModals()">
-  <div class="modal-container" (click)="$event.stopPropagation()">
-       
-    <div class="auth-container">
-        <button class="modal-close" (click)="closeModals()">
-            <i class="fas fa-times"></i>
-        </button>
-      <div class="auth-header">
-        <h2 class="auth-title">Crear Cuenta</h2>
-        <p class="auth-subtitle">Regístrate para comenzar a comprar</p>
-      </div>
-
-      <form class="auth-form" (ngSubmit)="onRegister()">
-        <div class="form-group">
-          <label class="form-label" for="register-name">Nombre</label>
-          <input 
-            type="text" 
-            id="register-name" 
-            placeholder="Tu nombre completo" 
-            [(ngModel)]="registerData.name" 
-            name="registerName" 
-            class="form-input" 
-            required
-          >
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="register-email">Email</label>
-          <input 
-            type="email" 
-            id="register-email" 
-            placeholder="Tu email" 
-            [(ngModel)]="registerData.email" 
-            name="registerEmail" 
-            class="form-input" 
-            required
-          >
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="register-password">Contraseña</label>
-          <input 
-            type="password" 
-            id="register-password" 
-            placeholder="Crea una contraseña segura" 
-            [(ngModel)]="registerData.password" 
-            name="registerPassword" 
-            class="form-input" 
-            required
-          >
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="register-password-confirm">Confirmar Contraseña</label>
-          <input 
-            type="password" 
-            id="register-password-confirm" 
-            placeholder="Repite tu contraseña" 
-            [(ngModel)]="registerData.password_confirmation" 
-            name="registerPasswordConfirm" 
-            class="form-input" 
-            required
-          >
-        </div>
-
-        <div *ngIf="showRegisterError && authErrorMessage" class="error-message show">
-            <i class="fas fa-exclamation-circle"></i>
-            <span>{{ authErrorMessage }}</span>
-            <button class="error-close" (click)="showRegisterError = false; authErrorMessage = ''">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-
-        <button type="submit" class="auth-button" 
-                [disabled]="!registerData.name || !registerData.email || !registerData.password || !registerData.password_confirmation">
-          Crear Cuenta
-        </button>
-
-        <div class="auth-link">
-          <a href="javascript:void(0)" (click)="closeModals(); openLoginModal()">
-            ¿Ya tienes una cuenta? Inicia sesión
-          </a>
-        </div>
-      </form>
+    </div>
+    <div class="hero-image">
+      <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600&h=600&fit=crop&crop=center" alt="Tienda de ropa Estilos Moda">
     </div>
   </div>
-</div>
-<!-- Sección de Productos Destacados -->
-<!-- <section class="featured-products-section"> -->
-    <!-- <div class="section-content">
-        <h2>Productos Destacados</h2>
-        <p>Nuestros productos más populares y mejor valorados. ¡No te los pierdas!</p>
-        
-        <div class="products-grid-wrapper">
-            <div class="products-grid" id="productsGrid"> -->
-                <!-- Producto 1 -->
-                <!-- <div class="product-card">
-                    <img src="https://placehold.co/320x220/F0E6D8/594833?text=Camisa+Elegante" alt="Camisa Elegante">
-                    <div class="product-info">
-                        <h3>Camisa Elegante</h3>
-                        <div class="product-price">$129.99</div>
-                        <p class="product-description">Camisa de algodón premium con corte moderno, perfecta para ocasiones especiales.</p>
-                        <button>Comprar Ahora</button>
-                    </div>
-                </div> -->
+</section>
 
-                <!-- Producto 2 -->
-                <!-- <div class="product-card">
-                    <img src="https://placehold.co/320x220/E3DDF3/594833?text=Vestido+Casual" alt="Vestido Casual">
-                    <div class="product-info">
-                        <h3>Vestido Casual</h3>
-                        <div class="product-price">$89.99</div>
-                        <p class="product-description">Vestido versátil y cómodo, ideal para el día a día con un toque sofisticado.</p>
-                        <button>Comprar Ahora</button>
-                    </div>
-                </div> -->
-
-                <!-- Producto 3 -->
-                <!-- <div class="product-card">
-                    <img src="https://placehold.co/320x220/D0E0E3/594833?text=Jeans+Premium" alt="Jeans Premium">
-                    <div class="product-info">
-                        <h3>Jeans Premium</h3>
-                        <div class="product-price">$95.00</div>
-                        <p class="product-description">Jeans de mezclilla de alta calidad con ajuste perfecto y durabilidad excepcional.</p>
-                        <button>Comprar Ahora</button>
-                    </div>
-                </div> -->
-
-                <!-- Producto 4 -->
-                <!-- <div class="product-card">
-                    <img src="https://placehold.co/320x220/C8E6C9/594833?text=Chaqueta+Urbana" alt="Chaqueta Urbana">
-                    <div class="product-info">
-                        <h3>Chaqueta Urbana</h3>
-                        <div class="product-price">$159.99</div>
-                        <p class="product-description">Chaqueta moderna con diseño urbano, perfecta para el estilo casual contemporáneo.</p>
-                        <button>Comprar Ahora</button>
-                    </div>
-                </div> -->
-
-                <!-- Producto 5 -->
-                <!-- <div class="product-card">
-                    <img src="https://placehold.co/320x220/FFE0B2/594833?text=Zapatos+Deportivos" alt="Zapatos Deportivos">
-                    <div class="product-info">
-                        <h3>Zapatos Deportivos</h3>
-                        <div class="product-price">$110.00</div>
-                        <p class="product-description">Calzado deportivo con tecnología de amortiguación avanzada para máximo confort.</p>
-                        <button>Comprar Ahora</button>
-                    </div>
-                </div> -->
-
-                <!-- Producto 6 -->
-                <!-- <div class="product-card">
-                    <img src="https://placehold.co/320x220/F8BBD9/594833?text=Blusa+Femenina" alt="Blusa Femenina">
-                    <div class="product-info">
-                        <h3>Blusa Femenina</h3>
-                        <div class="product-price">$75.50</div>
-                        <p class="product-description">Blusa elegante con detalles únicos, ideal para looks profesionales y casuales.</p>
-                        <button>Comprar Ahora</button>
-                    </div>
-                </div> -->
-            <!-- </div>
-        </div> -->
-
-        <!-- Controles de navegación -->
-        <!-- <div class="products-navigation">
-            <button type="button" (click)="scrollProducts('left')" aria-label="Anterior">‹</button>
-            <button type="button" (click)="scrollProducts('right')" aria-label="Siguiente">›</button>
-        </div>
-    </div> -->
-<!-- </section> -->
-
-<!-- Sección de Newsletter -->
-<!-- <section class="newsletter-section">
-    <div class="section-content">
-        <h2>¡Únete a nuestra comunidad!</h2>
-        <p>Suscríbete para recibir las últimas novedades y ofertas exclusivas directamente en tu correo.</p>
-        <form>
-            <input type="email" placeholder="Introduce tu correo electrónico" required>
-            <button type="submit">Suscribirse</button>
-        </form>
+<!-- Benefits Section -->
+<section class="benefits">
+  <div class="benefits-container">
+    <div class="benefit-card" *ngFor="let benefit of benefits">
+      <div class="benefit-icon">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path *ngIf="benefit.icon === 'users'" d="M17 20h5v-2a3 3 0 0 0-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 0 1 5.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 0 1 9.288 0M15 7a3 3 0 1 1-6 0 3 3 0 0 1 6 0zm6 3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM7 10a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"/>
+          <path *ngIf="benefit.icon === 'star'" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+          <path *ngIf="benefit.icon === 'map-pin'" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+          <circle *ngIf="benefit.icon === 'credit-card'" cx="9" cy="9" r="2"/>
+          <path *ngIf="benefit.icon === 'credit-card'" d="M21 15a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h14a2 2 0 012 2v8z"/>
+        </svg>
+      </div>
+      <h3>{{benefit.title}}</h3>
+      <p>{{benefit.description}}</p>
     </div>
-</section> -->
+  </div>
+</section>
+
+<!-- Categories Grid -->
+<section id="categories" class="categories">
+  <div class="categories-container">
+    <h2 class="section-title">Nuestras Categorías</h2>
+    <div class="categories-grid">
+      <div class="category-card" *ngFor="let category of categories" (click)="navigateToCategory(category.slug)">
+        <div class="category-image">
+          <img [src]="'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=300&h=200&fit=crop&crop=center'" [alt]="category.name">
+          <div class="category-overlay"></div>
+        </div>
+        <div class="category-content">
+          <h3>{{category.name}}</h3>
+          <p>{{category.products}} productos</p>
+        </div>
+        <div class="category-badge">{{category.products}} productos</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonials -->
+<section class="testimonials">
+  <div class="testimonials-container">
+    <h2 class="section-title">Lo que dicen nuestros clientes</h2>
+    <div class="testimonials-grid">
+      <div class="testimonial-card" *ngFor="let testimonial of testimonials">
+        <div class="testimonial-stars">
+          <svg *ngFor="let star of [].constructor(testimonial.stars)" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          </svg>
+        </div>
+        <p class="testimonial-message">"{{testimonial.message}}"</p>
+        <p class="testimonial-author">{{testimonial.name}}, {{testimonial.age}} años</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WhatsApp CTA -->
+<div class="whatsapp-cta">
+  <button (click)="openWhatsAppCTA()" class="whatsapp-btn">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"/>
+    </svg>
+  </button>
+</div>
