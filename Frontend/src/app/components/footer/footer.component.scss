@@ -266,7 +266,7 @@
 
 .social-link {
   background: #ead3a3; /* Beige nuevo */
-  color: #000000; /* Negro */
+  color: #000000 !important; /* Negro con !important */
   width: 48px;
   height: 48px;
   border-radius: 50%;
@@ -278,15 +278,17 @@
   box-shadow: 0 4px 12px rgba(234,211,163,0.3);
 }
 
-.social-link:hover {
-  background: #989591; /* Beige más oscuro */
-  transform: translateY(-2px) scale(1.05);
-  box-shadow: 0 6px 16px rgba(234,211,163,0.4);
-}
-
 .social-link svg {
   width: 24px;
   height: 24px;
+  fill: currentColor;
+}
+
+.social-link:hover {
+  background: #000000; /* Negro */
+  color: #FFFFFF !important; /* Blanco */
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);
 }
 
 /* Footer Bottom */
