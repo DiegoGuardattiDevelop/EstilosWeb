@@ -1,4 +1,8 @@
-/* Footer Component Styles - Nueva Paleta con Beige #ead3a3 */
+/* Footer Component Styles - Nueva Paleta con Beige #ead3a3 y Fuente Montserrat */
+:host {
+  font-family: 'Montserrat', sans-serif;
+}
+
 .footer {
   background: #383838; /* Gris oscuro - Fondo principal */
   color: #FFFFFF; /* Blanco para texto */
