@@ -17,7 +17,7 @@
       </div>
     </div>
     <div class="hero-image">
-      <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600&h=600&fit=crop&crop=center" alt="Tienda de ropa Estilos Moda">
+      <img src="/assets/images/Logo_estilos_pastel.jpg" alt="Estilos Moda - Tu tienda de ropa en Pilar">
     </div>
   </div>
 </section>
@@ -46,16 +46,76 @@
   <div class="categories-container">
     <h2 class="section-title">Nuestras Categorías</h2>
     <div class="categories-grid">
-      <div class="category-card" *ngFor="let category of categories" (click)="navigateToCategory(category.slug)">
+      <!-- Mujer -->
+      <div class="category-card" (click)="navigateToCategory('mujer')">
         <div class="category-image">
-          <img [src]="'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=300&h=200&fit=crop&crop=center'" [alt]="category.name">
-          <div class="category-overlay"></div>
+          <img src="/assets/images/Femenino.png" alt="Mujer">
         </div>
         <div class="category-content">
-          <h3>{{category.name}}</h3>
-          <p>{{category.products}} productos</p>
+          <h3>Mujer</h3>
+          <p>250 productos</p>
         </div>
-        <div class="category-badge">{{category.products}} productos</div>
+        <div class="category-badge">250 productos</div>
+      </div>
+      
+      <!-- Hombre -->
+      <div class="category-card" (click)="navigateToCategory('hombre')">
+        <div class="category-image">
+          <img src="/assets/images/Masculino.png" alt="Hombre">
+        </div>
+        <div class="category-content">
+          <h3>Hombre</h3>
+          <p>180 productos</p>
+        </div>
+        <div class="category-badge">180 productos</div>
+      </div>
+      
+      <!-- Niños -->
+      <div class="category-card" (click)="navigateToCategory('ninos')">
+        <div class="category-image">
+          <img src="/assets/images/Ninos.png" alt="Niños">
+        </div>
+        <div class="category-content">
+          <h3>Niños</h3>
+          <p>120 productos</p>
+        </div>
+        <div class="category-badge">120 productos</div>
+      </div>
+      
+      <!-- Lencería -->
+      <div class="category-card" (click)="navigateToCategory('lenceria')">
+        <div class="category-image">
+          <img src="/assets/images/Lenceria.png" alt="Lencería">
+        </div>
+        <div class="category-content">
+          <h3>Lencería</h3>
+          <p>90 productos</p>
+        </div>
+        <div class="category-badge">90 productos</div>
+      </div>
+      
+      <!-- Accesorios -->
+      <div class="category-card" (click)="navigateToCategory('accesorios')">
+        <div class="category-image">
+          <img src="/assets/images/Accesorios.png" alt="Accesorios">
+        </div>
+        <div class="category-content">
+          <h3>Accesorios</h3>
+          <p>75 productos</p>
+        </div>
+        <div class="category-badge">75 productos</div>
+      </div>
+      
+      <!-- Outlet -->
+      <div class="category-card" (click)="navigateToCategory('outlet')">
+        <div class="category-image">
+          <img src="/assets/images/Outlet.png" alt="Outlet">
+        </div>
+        <div class="category-content">
+          <h3>Outlet</h3>
+          <p>45 productos</p>
+        </div>
+        <div class="category-badge">45 productos</div>
       </div>
     </div>
   </div>

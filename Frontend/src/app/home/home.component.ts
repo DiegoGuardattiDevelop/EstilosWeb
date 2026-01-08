@@ -34,14 +34,17 @@ interface Benefit {
   styleUrl: './home.component.scss'
 })
 export class HomeComponent implements OnInit, OnDestroy {
-  // Datos mock
+  // Imágenes del directorio public
+  readonly IMAGES_PATH = '/assets/';
+  
+  // Datos mock con imágenes locales
   categories: Category[] = [
-    { name: 'Mujer', slug: 'mujer', image: 'placeholder', products: 250 },
-    { name: 'Hombre', slug: 'hombre', image: 'placeholder', products: 180 },
-    { name: 'Talles Especiales', slug: 'talles-especiales', image: 'placeholder', products: 120 },
-    { name: 'Lencería', slug: 'lenceria', image: 'placeholder', products: 90 },
-    { name: 'Eventos', slug: 'eventos', image: 'placeholder', products: 45 },
-    { name: 'Niños', slug: 'ninos', image: 'placeholder', products: 60 }
+    { name: 'Mujer', slug: 'mujer', image: 'Femenino.png', products: 250 },
+    { name: 'Hombre', slug: 'hombre', image: 'Masculino.png', products: 180 },
+    { name: 'Niños', slug: 'ninos', image: 'Niños.png', products: 120 },
+    { name: 'Lencería', slug: 'lenceria', image: 'Lenceria.png', products: 90 },
+    { name: 'Accesorios', slug: 'accesorios', image: 'Accesorios.png', products: 75 },
+    { name: 'Outlet', slug: 'outlet', image: 'Outlet.png', products: 45 }
   ];
 
   testimonials: Testimonial[] = [

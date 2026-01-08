@@ -166,36 +166,24 @@
 
 .category-image {
   flex: 1;
-  background: linear-gradient(135deg, #ead3a3 0%, #d4b494 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
   position: relative;
   transition: all 0.4s ease;
+  background: transparent; /* Sin gradiente de fondo */
 }
 
 .category-card:hover .category-image {
   transform: scale(1.05);
 }
 
-.category-image::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(0,0,0,0.3) 100%);
-  z-index: 1;
-}
-
 .category-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  opacity: 0.8;
-  transition: opacity 0.4s ease;
+  display: block; /* Asegura que la imagen se muestre */
 }
 
 .category-card:hover .category-image img {
