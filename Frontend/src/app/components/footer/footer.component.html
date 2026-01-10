@@ -8,21 +8,21 @@
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.08 4.22a2 2 0 012.18-2h3a2 2 0 012 2v.5a.5.5 0 001 0V2a2 2 0 012-2h3a2 2 0 012 2v.5a.5.5 0 001 0V2a2 2 0 012-2h3a2 2 0 012 2v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63 3.07A19.5 19.5 0 013 16.93a2 2 0 01-2 2.18v3a2 2 0 012 2h3a2 2 0 012-2v-.5a.5.5 0 00-1 0V22a2 2 0 012 2h3a2 2 0 012-2v-.5a.5.5 0 00-1 0V22a2 2 0 012-2h3a2 2 0 012 2v-3a2 2 0 01-2.18-2 19.79 19.79 0 018.63-3.07A19.5 19.5 0 0121 16.93z"/>
           </svg>
-          <span>+54 11 1234-5678</span>
+          <a href="tel:+541112345678">+54 11 1234-5678</a>
         </div>
         <div class="contact-item">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
             <polyline points="22,6 12,13 2,6"/>
           </svg>
-          <span>info@estilosweb.com</span>
+          <a href="mailto:info@estilosweb.com">info@estilosweb.com</a>
         </div>
         <div class="contact-item">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1 1 18 0z"/>
             <circle cx="12" cy="10" r="3"/>
           </svg>
-          <span>Pilar, Córdoba</span>
+          <a href="https://www.google.com/maps/search/?api=1&query=Pilar,+Córdoba" target="_blank">Pilar, Córdoba</a>
         </div>
       </div>
     </div>
@@ -31,11 +31,10 @@
     <div class="footer-section">
       <h3>Explorar</h3>
       <ul>
-        <li><a routerLink="/">Inicio</a></li>
-        <li><a routerLink="/products">Productos</a></li>
-        <li><a routerLink="/categories">Categorías</a></li>
+        <li><a routerLink="/home">Inicio</a></li>
         <li><a routerLink="/cart">Carrito</a></li>
-        <li><a routerLink="/checkout">Checkout</a></li>
+        <li><a routerLink="/login">Iniciar Sesión</a></li>
+        <li><a routerLink="/register">Registrarse</a></li>
       </ul>
     </div>
 
@@ -43,11 +42,13 @@
     <div class="footer-section">
       <h3>Categorías</h3>
       <ul>
-        <li><a routerLink="/category/hombre">Hombre</a></li>
-        <li><a routerLink="/category/mujer">Mujer</a></li>
-        <li><a routerLink="/category/niños">Niños</a></li>
-        <li><a routerLink="/category/calzado">Calzado</a></li>
-        <li><a routerLink="/category/accesorios">Accesorios</a></li>
+        <!-- CORREGIDO: Usar los slugs correctos basados en los errores -->
+        <li><a routerLink="/products-by-category/femenino">Mujer</a></li>
+        <li><a routerLink="/products-by-category/masculino">Hombre</a></li>
+        <li><a routerLink="/products-by-category/ninos">Niños</a></li>
+        <li><a routerLink="/products-by-category/lenceria">Lencería</a></li>
+        <li><a routerLink="/products-by-category/blanco">Blanco</a></li>
+        <li><a routerLink="/products-by-category/accesorios">Accesorios</a></li>
       </ul>
     </div>
 

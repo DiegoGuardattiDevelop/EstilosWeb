@@ -1,36 +1,11 @@
 // src/app/components/footer/footer.component.ts
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { HttpClient } from '@angular/common/http'; // ✅ Solo HttpClient
-import { Observable, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { RouterModule, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { CartService } from '../../services/cart.service';
 import { AuthService } from '../../services/auth.service';
-
-interface FooterData {
-  companyInfo: {
-    name: string;
-    description: string;
-    phone: string;
-    email: string;
-    address: string;
-  };
-  socialLinks: SocialLink[];
-  quickLinks: QuickLink[];
-}
-
-interface SocialLink {
-  name: string;
-  url: string;
-  icon: string;
-}
-
-interface QuickLink {
-  name: string;
-  route: string;
-  icon: string;
-}
+import { User } from '../../models/user.model';
 
 @Component({
   selector: 'app-footer',
@@ -38,45 +13,41 @@ interface QuickLink {
   imports: [
     CommonModule, 
     RouterModule,
-    // ❌ QUITAR HttpClientModule de aquí - se importa a nivel de app
   ],
   templateUrl: './footer.component.html',
   styleUrls: ['./footer.component.scss']
 })
-export class FooterComponent implements OnInit {
-  footerData: FooterData = this.getDefaultData();
+export class FooterComponent implements OnInit, OnDestroy {
   currentYear: number = new Date().getFullYear();
-  isLoading: boolean = false;
   
   // Propiedades para el carrito
   cartItemCount: number = 0;
+  private cartSubscription!: Subscription;
   
   // Propiedades para autenticación
   isAuthenticated: boolean = false;
   userName: string = '';
   userInitials: string = '';
   isUserMenuOpen: boolean = false;
+  private authSubscription!: Subscription;
 
   constructor(
-    private http: HttpClient,
     private cartService: CartService,
-    private authService: AuthService
+    private authService: AuthService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
-    // this.loadFooterData();
-    this.footerData = this.getDefaultData();
-    
     // Suscribirse a cambios del carrito
-    this.cartService.getCartItems().subscribe(items => {
-      this.cartItemCount = items.length;
+    this.cartSubscription = this.cartService.getCartItems().subscribe(items => {
+      this.cartItemCount = items.reduce((total, item) => total + item.quantity, 0);
     });
     
     // Suscribirse a cambios de autenticación
-    this.authService.currentUser$.subscribe(user => {
+    this.authSubscription = this.authService.currentUser$.subscribe(user => {
       this.isAuthenticated = !!user;
       if (user) {
-        this.userName = user.name || 'Usuario';
+        this.userName = user.name || user.email || 'Usuario';
         this.userInitials = this.getUserNameInitials(this.userName);
       } else {
         this.userName = '';
@@ -85,61 +56,23 @@ export class FooterComponent implements OnInit {
     });
   }
 
-  private loadFooterData(): void {
-    this.isLoading = true;
-    
-    this.http.get<FooterData>('/api/footer-data').pipe(
-      catchError(error => {
-        console.error('Error loading footer data:', error);
-        return of(this.getDefaultData());
-      })
-    ).subscribe({
-      next: (data) => {
-        this.footerData = data;
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('HTTP Error:', error);
-        this.footerData = this.getDefaultData();
-        this.isLoading = false;
-      }
-    });
+  ngOnDestroy(): void {
+    if (this.cartSubscription) {
+      this.cartSubscription.unsubscribe();
+    }
+    if (this.authSubscription) {
+      this.authSubscription.unsubscribe();
+    }
   }
 
-  private getDefaultData(): FooterData {
-    return {
-      companyInfo: {
-        name: 'EstilosWeb',
-        description: 'Tienda de ropa confiable con 40 años en Pilar',
-        phone: '+54 11 1234-5678',
-        email: 'info@estilosweb.com',
-        address: 'Pilar, Buenos Aires'
-      },
-      socialLinks: [
-        { name: 'WhatsApp', url: '#', icon: 'fab fa-whatsapp' },
-        { name: 'Instagram', url: '#', icon: 'fab fa-instagram' },
-        { name: 'Facebook', url: '#', icon: 'fab fa-facebook-f' }
-      ],
-      quickLinks: [
-        { name: 'Inicio', route: '/', icon: 'fas fa-home' },
-        { name: 'Productos', route: '/products', icon: 'fas fa-shopping-bag' },
-        { name: 'Categorías', route: '/categories', icon: 'fas fa-tags' },
-        { name: 'Carrito', route: '/cart', icon: 'fas fa-shopping-cart' },
-        { name: 'Checkout', route: '/checkout', icon: 'fas fa-credit-card' }
-      ]
-    };
-  }
-
-  // Métodos para el carrito
+  // Métodos para el carrito - Usar router en lugar de window.location
   openCart(): void {
-    // Navegar al carrito
-    window.location.href = '/cart';
+    this.router.navigate(['/cart']);
   }
 
   // Métodos para autenticación
   openLogin(): void {
-    // Navegar al login
-    window.location.href = '/login';
+    this.router.navigate(['/login']);
   }
 
   toggleUserMenu(): void {
@@ -148,34 +81,44 @@ export class FooterComponent implements OnInit {
 
   goToProfile(): void {
     this.isUserMenuOpen = false;
-    window.location.href = '/profile';
+    this.router.navigate(['/profile']);
   }
 
   goToOrders(): void {
     this.isUserMenuOpen = false;
-    window.location.href = '/orders';
+    this.router.navigate(['/profile'], { queryParams: { section: 'orders' } });
   }
 
   logout(): void {
-    this.authService.logout();
-    this.isUserMenuOpen = false;
+    this.authService.logout().subscribe({
+      next: () => {
+        this.isUserMenuOpen = false;
+        this.router.navigate(['/home']);
+      },
+      error: (error) => {
+        console.error('Error al cerrar sesión:', error);
+      }
+    });
   }
 
   private getUserNameInitials(name: string): string {
     if (!name) return 'U';
-    const names = name.split(' ');
+    const names = name.trim().split(' ');
     if (names.length >= 2) {
       return (names[0][0] + names[1][0]).toUpperCase();
     }
     return names[0][0].toUpperCase();
   }
 
+  // Método para abrir WhatsApp
   openWhatsApp(): void {
-    const message = 'Hola, me gustaría obtener más información';
-    const url = `https://wa.me/${this.footerData.companyInfo.phone}?text=${encodeURIComponent(message)}`;
+    const message = 'Hola, me gustaría obtener más información sobre sus productos';
+    const phoneNumber = '5491112345678'; // Número sin caracteres especiales
+    const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
     window.open(url, '_blank');
   }
 
+  // Método para scroll al inicio
   scrollToTop(): void {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }

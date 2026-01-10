@@ -43,8 +43,9 @@ export class HomeComponent implements OnInit, OnDestroy {
     { name: 'Hombre', slug: 'hombre', image: 'Masculino.png', products: 180 },
     { name: 'Niños', slug: 'ninos', image: 'Niños.png', products: 120 },
     { name: 'Lencería', slug: 'lenceria', image: 'Lenceria.png', products: 90 },
-    { name: 'Accesorios', slug: 'accesorios', image: 'Accesorios.png', products: 75 },
-    { name: 'Outlet', slug: 'outlet', image: 'Outlet.png', products: 45 }
+    { name: 'Blanco', slug: 'blanco', image: 'Blanco.png', products: 45 },
+    { name: 'Accesorios', slug: 'accesorios', image: 'Accesorios.png', products: 75 }
+    
   ];
 
   testimonials: Testimonial[] = [

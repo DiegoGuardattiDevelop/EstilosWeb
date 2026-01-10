@@ -47,7 +47,7 @@
     <h2 class="section-title">Nuestras Categorías</h2>
     <div class="categories-grid">
       <!-- Mujer -->
-      <div class="category-card" (click)="navigateToCategory('mujer')">
+      <div class="category-card" (click)="navigateToCategory('femenino')">
         <div class="category-image">
           <img src="/assets/images/Femenino.png" alt="Mujer">
         </div>
@@ -59,7 +59,7 @@
       </div>
       
       <!-- Hombre -->
-      <div class="category-card" (click)="navigateToCategory('hombre')">
+      <div class="category-card" (click)="navigateToCategory('masculino')">
         <div class="category-image">
           <img src="/assets/images/Masculino.png" alt="Hombre">
         </div>
@@ -94,6 +94,18 @@
         <div class="category-badge">90 productos</div>
       </div>
       
+      <!-- Blanco -->
+      <div class="category-card" (click)="navigateToCategory('blanco')">
+        <div class="category-image">
+          <img src="/assets/images/Blanco.png" alt="Blanco">
+        </div>
+        <div class="category-content">
+          <h3>Blanco</h3>
+          <p>45 productos</p>
+        </div>
+        <div class="category-badge">45 productos</div>
+      </div>
+
       <!-- Accesorios -->
       <div class="category-card" (click)="navigateToCategory('accesorios')">
         <div class="category-image">
@@ -106,17 +118,6 @@
         <div class="category-badge">75 productos</div>
       </div>
       
-      <!-- Outlet -->
-      <div class="category-card" (click)="navigateToCategory('outlet')">
-        <div class="category-image">
-          <img src="/assets/images/Outlet.png" alt="Outlet">
-        </div>
-        <div class="category-content">
-          <h3>Outlet</h3>
-          <p>45 productos</p>
-        </div>
-        <div class="category-badge">45 productos</div>
-      </div>
     </div>
   </div>
 </section>
