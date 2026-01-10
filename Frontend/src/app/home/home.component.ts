@@ -4,14 +4,8 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../services/auth.service';
+import { CategoryService, Category } from '../services/category.service';
 import { Subscription } from 'rxjs';
-
-interface Category {
-  name: string;
-  slug: string;
-  image: string;
-  products: number;
-}
 
 interface Testimonial {
   name: string;
@@ -39,12 +33,12 @@ export class HomeComponent implements OnInit, OnDestroy {
   
   // Datos mock con imágenes locales
   categories: Category[] = [
-    { name: 'Mujer', slug: 'mujer', image: 'Femenino.png', products: 250 },
-    { name: 'Hombre', slug: 'hombre', image: 'Masculino.png', products: 180 },
-    { name: 'Niños', slug: 'ninos', image: 'Niños.png', products: 120 },
-    { name: 'Lencería', slug: 'lenceria', image: 'Lenceria.png', products: 90 },
-    { name: 'Accesorios', slug: 'accesorios', image: 'Accesorios.png', products: 75 },
-    { name: 'Outlet', slug: 'outlet', image: 'Outlet.png', products: 45 }
+    { id: 1, name: 'Mujer', slug: 'mujer', image_url: 'Femenino.png', products_count: 250 },
+    { id: 2, name: 'Hombre', slug: 'hombre', image_url: 'Masculino.png', products_count: 180 },
+    { id: 3, name: 'Niños', slug: 'ninos', image_url: 'Niños.png', products_count: 120 },
+    { id: 4, name: 'Lencería', slug: 'lenceria', image_url: 'Lenceria.png', products_count: 90 },
+    { id: 5, name: 'Accesorios', slug: 'accesorios', image_url: 'Accesorios.png', products_count: 75 },
+    { id: 6, name: 'Outlet', slug: 'outlet', image_url: 'Outlet.png', products_count: 45 }
   ];
 
   testimonials: Testimonial[] = [
@@ -75,11 +69,13 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   constructor(
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    public categoryService: CategoryService
   ) {}
 
   ngOnInit(): void {
     this.setupAuthListener();
+    this.loadCategories();
   }
 
   ngOnDestroy(): void {
@@ -108,6 +104,18 @@ export class HomeComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Error loading user profile:', error);
+      }
+    });
+  }
+
+  private loadCategories(): void {
+    this.categoryService.getCategories().subscribe({
+      next: (categories) => {
+        this.categories = categories;
+        this.categoryService.preloadImages(categories);
+      },
+      error: (error) => {
+        console.error('Error loading categories:', error);
       }
     });
   }

@@ -49,7 +49,7 @@
       <!-- Mujer -->
       <div class="category-card" (click)="navigateToCategory('mujer')">
         <div class="category-image">
-          <img src="/assets/images/Femenino.png" alt="Mujer">
+          <img [src]="categoryService.getCategoryImageUrl('Femenino.png')" alt="Mujer">
         </div>
         <div class="category-content">
           <h3>Mujer</h3>
@@ -61,7 +61,7 @@
       <!-- Hombre -->
       <div class="category-card" (click)="navigateToCategory('hombre')">
         <div class="category-image">
-          <img src="/assets/images/Masculino.png" alt="Hombre">
+          <img [src]="categoryService.getCategoryImageUrl('Masculino.png')" alt="Hombre">
         </div>
         <div class="category-content">
           <h3>Hombre</h3>
@@ -73,7 +73,7 @@
       <!-- Niños -->
       <div class="category-card" (click)="navigateToCategory('ninos')">
         <div class="category-image">
-          <img src="/assets/images/Ninos.png" alt="Niños">
+          <img [src]="categoryService.getCategoryImageUrl('Ninos.png')" alt="Niños">
         </div>
         <div class="category-content">
           <h3>Niños</h3>
@@ -85,7 +85,7 @@
       <!-- Lencería -->
       <div class="category-card" (click)="navigateToCategory('lenceria')">
         <div class="category-image">
-          <img src="/assets/images/Lenceria.png" alt="Lencería">
+          <img [src]="categoryService.getCategoryImageUrl('Lenceria.png')" alt="Lencería">
         </div>
         <div class="category-content">
           <h3>Lencería</h3>
@@ -97,7 +97,7 @@
       <!-- Accesorios -->
       <div class="category-card" (click)="navigateToCategory('accesorios')">
         <div class="category-image">
-          <img src="/assets/images/Accesorios.png" alt="Accesorios">
+          <img [src]="categoryService.getCategoryImageUrl('Accesorios.png')" alt="Accesorios">
         </div>
         <div class="category-content">
           <h3>Accesorios</h3>
@@ -109,7 +109,7 @@
       <!-- Outlet -->
       <div class="category-card" (click)="navigateToCategory('outlet')">
         <div class="category-image">
-          <img src="/assets/images/Outlet.png" alt="Outlet">
+          <img [src]="categoryService.getCategoryImageUrl('Outlet.png')" alt="Outlet">
         </div>
         <div class="category-content">
           <h3>Outlet</h3>
