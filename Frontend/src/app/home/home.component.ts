@@ -109,6 +109,9 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   private loadCategories(): void {
+    // Limpiar el cache para asegurar que se carguen los datos actualizados
+    this.categoryService.clearCache();
+
     this.categoryService.getCategories().subscribe({
       next: (categories) => {
         this.categories = categories;
