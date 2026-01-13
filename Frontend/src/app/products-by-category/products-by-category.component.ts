@@ -46,19 +46,21 @@ export class ProductsByCategoryComponent implements OnInit, OnDestroy {
     maxPrice: number | null;
     sortBy: string;
     sortOrder: 'asc' | 'desc';
+    size: string | null;
   } = {
     searchTerm: null,
     minPrice: null,
     maxPrice: null,
     sortBy: 'created_at',
-    sortOrder: 'desc'
+    sortOrder: 'desc',
+    size: null
   };
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private productService: ProductService,
-    private categoryService: CategoryService,
+    public categoryService: CategoryService,
     private location: Location,
     private cartService: CartService,
     private authService: AuthService
@@ -211,7 +213,8 @@ export class ProductsByCategoryComponent implements OnInit, OnDestroy {
       minPrice: null,
       maxPrice: null,
       sortBy: 'created_at',
-      sortOrder: 'desc'
+      sortOrder: 'desc',
+      size: null
     };
     this.applyFilters();
   }
@@ -228,7 +231,8 @@ export class ProductsByCategoryComponent implements OnInit, OnDestroy {
       this.filters.minPrice !== null ||
       this.filters.maxPrice !== null ||
       this.filters.sortBy !== 'created_at' ||
-      this.filters.sortOrder !== 'desc'
+      this.filters.sortOrder !== 'desc' ||
+      this.filters.size !== null
     );
   }
 
@@ -247,6 +251,9 @@ export class ProductsByCategoryComponent implements OnInit, OnDestroy {
         break;
       case 'search':
         this.filters.searchTerm = null;
+        break;
+      case 'size':
+        this.filters.size = null;
         break;
     }
     this.applyFilters();

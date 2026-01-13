@@ -32,6 +32,7 @@
 - [x] **NavbarComponent** - Navegación completa con búsqueda y carrito
 - [x] **HomeComponent** - Hero section optimizado con categorías dinámicas
 - [x] **ProductsByCategory** - Listado y filtros funcionales
+- [ ] **Mejora de Interfaz ProductsByCategory** - Alinear con lineamientos del HomeComponent
 - [x] **ProductDetail** - Galería, variantes, accesibilidad completa
 - [x] **FooterComponent** - Enlaces funcionales y responsive
 
@@ -123,7 +124,18 @@
 
 ### 💡 **MEJORAS - Nice to Have**
 
-#### 7. **Stock por Variante** 🟡
+#### 7. **Mejora de Interfaz ProductsByCategory** 🟡
+
+- **Estado:** ❌ Pendiente
+- **Impacto:** Medio - UX mejorada
+- **Requerimientos:**
+  - Alinear con lineamientos del HomeComponent
+  - Mejorar consistencia visual
+  - Optimización de experiencia de usuario
+- **Esfuerzo:** 3 horas
+- **Prioridad:** MEDIA
+
+#### 8. **Stock por Variante** 🟡
 
 - **Estado:** ❌ Pendiente
 - **Impacto:** Bajo - UX mejorada
