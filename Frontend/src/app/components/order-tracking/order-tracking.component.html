@@ -1,0 +1,99 @@
+<div class="order-tracking">
+  <div class="tracking-container">
+    <div *ngIf="isLoading" class="loading-spinner">
+      <i class="fas fa-spinner fa-spin"></i>
+      <p>Cargando información de seguimiento...</p>
+    </div>
+
+    <div *ngIf="!isLoading && errorMessage" class="error-message">
+      <i class="fas fa-exclamation-circle"></i>
+      <p>{{ errorMessage }}</p>
+    </div>
+
+    <div *ngIf="!isLoading && !errorMessage && orderDetails" class="tracking-content">
+      <div class="tracking-header">
+        <h1>Seguimiento de Pedido</h1>
+        <p class="order-number">Número de orden: <strong>{{ orderDetails.order_number }}</strong></p>
+      </div>
+
+      <div class="status-indicator">
+        <div class="status-icon">
+          <i [class]="getStatusIcon(trackingStatus)"></i>
+        </div>
+        <h2>{{ getStatusText(trackingStatus) }}</h2>
+        <p class="status-date">Última actualización: {{ orderDetails.updated_at | date:'medium' }}</p>
+      </div>
+
+      <div class="tracking-steps">
+        <div class="step" [class.completed]="trackingStatus === 'cancelled' || ['confirmed', 'processing', 'shipped', 'delivered'].includes(trackingStatus)">
+          <div class="step-icon">
+            <i class="fas fa-check-circle"></i>
+          </div>
+          <span class="step-title">Pedido Confirmado</span>
+        </div>
+
+        <div class="step" [class.completed]="trackingStatus === 'cancelled' || ['processing', 'shipped', 'delivered'].includes(trackingStatus)">
+          <div class="step-icon">
+            <i *ngIf="['processing', 'shipped', 'delivered'].includes(trackingStatus)" class="fas fa-check-circle"></i>
+            <i *ngIf="trackingStatus === 'confirmed'" class="fas fa-clock"></i>
+          </div>
+          <span class="step-title">En Proceso</span>
+        </div>
+
+        <div class="step" [class.completed]="trackingStatus === 'cancelled' || ['shipped', 'delivered'].includes(trackingStatus)">
+          <div class="step-icon">
+            <i *ngIf="['shipped', 'delivered'].includes(trackingStatus)" class="fas fa-check-circle"></i>
+            <i *ngIf="['confirmed', 'processing'].includes(trackingStatus)" class="fas fa-clock"></i>
+          </div>
+          <span class="step-title">Enviado</span>
+        </div>
+
+        <div class="step" [class.completed]="trackingStatus === 'delivered' || trackingStatus === 'cancelled'">
+          <div class="step-icon">
+            <i *ngIf="trackingStatus === 'delivered'" class="fas fa-check-circle"></i>
+            <i *ngIf="['confirmed', 'processing', 'shipped'].includes(trackingStatus)" class="fas fa-clock"></i>
+            <i *ngIf="trackingStatus === 'cancelled'" class="fas fa-times-circle"></i>
+          </div>
+          <span class="step-title">Entregado</span>
+        </div>
+      </div>
+
+      <div class="order-details">
+        <div class="detail-card">
+          <h3>Información del Pedido</h3>
+          <p><strong>Fecha de pedido:</strong> {{ orderDetails.created_at | date:'medium' }}</p>
+          <p><strong>Total:</strong> ${{ orderDetails.total_amount | number:'1.2-2' }}</p>
+          <p><strong>Método de envío:</strong> {{ orderDetails.shipping_method?.name }}</p>
+        </div>
+
+        <div class="detail-card">
+          <h3>Dirección de Envío</h3>
+          <p>{{ orderDetails.shipping_address?.fullName }}</p>
+          <p>{{ orderDetails.shipping_address?.street }}</p>
+          <p>{{ orderDetails.shipping_address?.city }}, {{ orderDetails.shipping_address?.state }} {{ orderDetails.shipping_address?.zipCode }}</p>
+          <p>📞 {{ orderDetails.shipping_address?.phone }}</p>
+        </div>
+      </div>
+
+      <div class="items-summary">
+        <h3>Productos en tu pedido</h3>
+        <div class="items-list">
+          <div *ngFor="let item of orderDetails.items" class="item">
+            <span class="item-name">{{ item.product_name }}</span>
+            <span class="item-quantity">x{{ item.quantity }}</span>
+            <span class="item-price">${{ item.price | number:'1.2-2' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn-primary" (click)="continueShopping()">
+          <i class="fas fa-shopping-bag"></i> Seguir Comprando
+        </button>
+        <button class="btn-secondary" (click)="contactSupport()">
+          <i class="fas fa-headset"></i> Contactar Soporte
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
