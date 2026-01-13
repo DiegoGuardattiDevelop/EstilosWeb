@@ -35,10 +35,11 @@ export class HomeComponent implements OnInit, OnDestroy {
   categories: Category[] = [
     { id: 1, name: 'Mujer', slug: 'mujer', image_url: 'Femenino.png', products_count: 250 },
     { id: 2, name: 'Hombre', slug: 'hombre', image_url: 'Masculino.png', products_count: 180 },
-    { id: 3, name: 'Niños', slug: 'ninos', image_url: 'Niños.png', products_count: 120 },
+    { id: 3, name: 'Infantil', slug: 'infantil', image_url: 'Infantil.png', products_count: 120 },
     { id: 4, name: 'Lencería', slug: 'lenceria', image_url: 'Lenceria.png', products_count: 90 },
-    { id: 5, name: 'Accesorios', slug: 'accesorios', image_url: 'Accesorios.png', products_count: 75 },
-    { id: 6, name: 'Outlet', slug: 'outlet', image_url: 'Outlet.png', products_count: 45 }
+    { id: 5, name: 'Blanco', slug: 'blanco', image_url: 'blanco.png', products_count: 45 },
+    { id: 6, name: 'Accesorios', slug: 'accesorios', image_url: 'Accesorios.png', products_count: 75 }
+    
   ];
 
   testimonials: Testimonial[] = [
@@ -167,8 +168,21 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   navigateToCategory(slug: string): void {
-    this.router.navigate(['/products-by-category', slug]);
-  }
+  console.log('🔵 CLICK en categoría:', slug);
+  console.log('📍 Router disponible:', !!this.router);
+  
+  // Prueba con setTimeout para ver si es problema de timing
+  setTimeout(() => {
+    this.router.navigate(['/products-by-category', slug])
+      .then(success => {
+        console.log('✅ Navegación exitosa');
+        console.log('🔄 URL actual:', window.location.href);
+      })
+      .catch(error => {
+        console.error('❌ Error en navigate:', error);
+      });
+  }, 100);
+}
 
   onSearch(): void {
     if (this.searchQuery.trim()) {

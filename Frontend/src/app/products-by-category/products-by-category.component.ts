@@ -65,36 +65,36 @@ export class ProductsByCategoryComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit(): void {
+    console.log('🟢 ProductsByCategoryComponent INICIALIZADO');
+    
+    // ✅ SOLUCIÓN: Obtener el slug INMEDIATAMENTE del snapshot
+    this.categorySlug = this.route.snapshot.paramMap.get('slug') || '';
+    console.log('📍 Slug del snapshot:', this.categorySlug);
+    
     // ✅ Inicializar observables del carrito
     this.cartItems$ = this.cartService.getCartItems();
     this.cartTotal$ = this.cartService.getTotalPrice();
 
+    // ✅ Si no hay slug, MOSTRAR ERROR pero NO REDIRIGIR
+    if (!this.categorySlug) {
+      console.error('❌ ERROR: No hay slug en la URL');
+      this.isLoading = false;
+      return; // NO redirigir, solo salir
+    }
+
+    // ✅ Cargar categoría inicial
+    this.loadCategoryAndProducts();
+
+    // ✅ Escuchar cambios en la ruta (para navegación entre categorías)
     this.route.paramMap.pipe(
-      switchMap(params => {
-        this.categorySlug = params.get('slug') || '';
-        this.isLoading = true;
-
-        if (!this.categorySlug) {
-          this.router.navigate(['/']);
-          return EMPTY;
-        }
-
-        return this.categoryService.getCategoryBySlug(this.categorySlug);
-      }),
       takeUntil(this.destroy$)
-    ).subscribe({
-      next: (categoryData) => {
-        this.category = categoryData;
-        if (this.category) {
-          this.loadProducts();
-        } else {
-          this.router.navigate(['/']);
-          this.isLoading = false;
-        }
-      },
-      error: (err) => {
-        this.isLoading = false;
-        this.router.navigate(['/']);
+    ).subscribe(params => {
+      const newSlug = params.get('slug') || '';
+      console.log('🔄 Slug actualizado:', newSlug);
+      
+      if (newSlug && newSlug !== this.categorySlug) {
+        this.categorySlug = newSlug;
+        this.loadCategoryAndProducts();
       }
     });
   }
@@ -102,6 +102,35 @@ export class ProductsByCategoryComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  // ✅ Método para cargar categoría y productos
+  private loadCategoryAndProducts(): void {
+    this.isLoading = true;
+    console.log('🚀 Cargando categoría:', this.categorySlug);
+    
+    this.categoryService.getCategoryBySlug(this.categorySlug).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (categoryData) => {
+        console.log('📦 Categoría encontrada:', categoryData);
+        this.category = categoryData;
+        
+        if (this.category) {
+          this.loadProducts();
+        } else {
+          console.warn('⚠️ Categoría no encontrada');
+          // ✅ NO REDIRIGIR, solo mostrar estado vacío
+          this.products = [];
+          this.isLoading = false;
+        }
+      },
+      error: (err) => {
+        console.error('❌ Error cargando categoría:', err);
+        this.isLoading = false;
+        // ✅ NO REDIRIGIR, manejar error en UI
+      }
+    });
   }
 
   // ✅ Método para navegar al detalle del producto
@@ -117,8 +146,6 @@ export class ProductsByCategoryComponent implements OnInit, OnDestroy {
 
   loadProducts(): void {
     if (!this.category) return;
-
-    this.isLoading = true;
 
     this.productService.getProducts(
       this.category.slug,
@@ -137,6 +164,7 @@ export class ProductsByCategoryComponent implements OnInit, OnDestroy {
         this.currentPage = res.current_page;
         this.generatePaginationRange();
         this.isLoading = false;
+        console.log(`✅ ${this.products.length} productos cargados`);
       },
       error: (err) => {
         console.error('Error al cargar productos:', err);

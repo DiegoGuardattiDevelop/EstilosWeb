@@ -130,6 +130,21 @@
         <div class="category-badge">90 productos</div>
       </div>
 
+      <!-- Blanco -->
+      <div class="category-card" (click)="navigateToCategory('blanco')">
+        <div class="category-image">
+          <img
+            [src]="categoryService.getCategoryImageUrl('Blanco.png')"
+            alt="Blanco"
+          />
+        </div>
+        <div class="category-content">
+          <h3>Blanco</h3>
+          <p>45 productos</p>
+        </div>
+        <div class="category-badge">45 productos</div>
+      </div>
+
       <!-- Accesorios -->
       <div class="category-card" (click)="navigateToCategory('accesorios')">
         <div class="category-image">
@@ -145,20 +160,6 @@
         <div class="category-badge">75 productos</div>
       </div>
 
-      <!-- Outlet -->
-      <div class="category-card" (click)="navigateToCategory('outlet')">
-        <div class="category-image">
-          <img
-            [src]="categoryService.getCategoryImageUrl('Outlet.png')"
-            alt="Outlet"
-          />
-        </div>
-        <div class="category-content">
-          <h3>Outlet</h3>
-          <p>45 productos</p>
-        </div>
-        <div class="category-badge">45 productos</div>
-      </div>
     </div>
   </div>
 </section>

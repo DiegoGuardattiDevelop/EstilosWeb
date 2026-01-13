@@ -107,7 +107,7 @@ export class CategoryService {
     return [
       { id: 1, name: 'Mujer', slug: 'mujer', image_url: 'Femenino.png', products_count: 250 },
       { id: 2, name: 'Hombre', slug: 'hombre', image_url: 'Masculino.png', products_count: 180 },
-      { id: 3, name: 'Niños', slug: 'ninos', image_url: 'Niños.png', products_count: 120 },
+      { id: 3, name: 'Infantil', slug: 'infantil', image_url: 'Infantil.png', products_count: 120 },
       { id: 4, name: 'Lencería', slug: 'lenceria', image_url: 'Lenceria.png', products_count: 90 },
       { id: 5, name: 'Accesorios', slug: 'accesorios', image_url: 'Accesorios.png', products_count: 75 },
       { id: 6, name: 'Outlet', slug: 'outlet', image_url: 'Outlet.png', products_count: 45 }
