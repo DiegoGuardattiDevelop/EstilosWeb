@@ -15,7 +15,16 @@ interface ShippingMethod {
   name: string;
   description: string;
   cost: number;
-  days: number;
+  estimatedDays: number;
+  isFree?: boolean;
+}
+
+interface ShippingRequest {
+  country?: string;
+  state?: string;
+  city?: string;
+  zipCode?: string;
+  cartTotal?: number;
 }
 
 interface OrderSummary {
@@ -47,27 +56,28 @@ export class CheckoutComponent implements OnInit, OnDestroy, AfterViewInit {
   
   // Opciones de envío
   shippingMethods: ShippingMethod[] = [
-    {
-      id: 'standard',
-      name: 'Envío Estándar',
-      description: '5-7 días hábiles',
-      cost: 50,
-      days: 7
-    },
-    {
-      id: 'express',
-      name: 'Envío Express',
-      description: '2-3 días hábiles',
-      cost: 150,
-      days: 3
-    },
-    {
-      id: 'overnight',
-      name: 'Envío Nocturno',
-      description: '24 horas',
-      cost: 250,
-      days: 1
-    }
+    // Métodos de envío estáticos (se reemplazarán con datos dinámicos del backend)
+    // {
+    //   id: 'standard',
+    //   name: 'Envío Estándar',
+    //   description: '5-7 días hábiles',
+    //   cost: 50,
+    //   estimatedDays: 7
+    // },
+    // {
+    //   id: 'express',
+    //   name: 'Envío Express',
+    //   description: '2-3 días hábiles',
+    //   cost: 150,
+    //   estimatedDays: 3
+    // },
+    // {
+    //   id: 'overnight',
+    //   name: 'Envío Nocturno',
+    //   description: '24 horas',
+    //   cost: 250,
+    //   estimatedDays: 1
+    // }
   ];
 
   selectedShipping: ShippingMethod | null = null;
@@ -103,7 +113,9 @@ export class CheckoutComponent implements OnInit, OnDestroy, AfterViewInit {
   ngOnInit() {
     this.initializeForms();
     this.calculateOrderSummary();
+    this.loadShippingMethods();
   }
+
 
   ngAfterViewInit() {
     // Asegurar que el DOM esté listo antes de montar Stripe
@@ -182,6 +194,61 @@ export class CheckoutComponent implements OnInit, OnDestroy, AfterViewInit {
           total
         };
       });
+  }
+
+  private loadShippingMethods(): void {
+    this.isLoading = true;
+    
+    // Obtener datos del formulario para calcular envíos
+    const shippingData: ShippingRequest = {
+      country: this.shippingForm.get('country')?.value || 'MX',
+      state: this.shippingForm.get('state')?.value,
+      city: this.shippingForm.get('city')?.value,
+      zipCode: this.shippingForm.get('zipCode')?.value,
+      cartTotal: this.orderSummary.subtotal
+    };
+
+    // TODO: Implementar llamada al backend para obtener métodos de envío dinámicos
+    // this.http.get('/api/shipping-methods')
+    //   .pipe(takeUntil(this.destroy$))
+    //   .subscribe({
+    //     next: (methods: any) => {
+    //       this.shippingMethods = methods;
+    //       if (methods.length > 0) {
+    //         this.selectShippingMethod(methods[0]);
+    //       }
+    //     },
+    //     error: (error: any) => {
+    //       console.error('Error loading shipping methods:', error);
+    //       // Usar métodos estáticos de respaldo
+    //       this.shippingMethods = [
+    //         {
+    //           id: 'standard',
+    //           name: 'Envío Estándar',
+    //           description: '5-7 días hábiles',
+    //           cost: 50,
+    //           estimatedDays: 7,
+    //           isFree: false
+    //         },
+    //         {
+    //           id: 'express',
+    //           name: 'Envío Express',
+    //           description: '2-3 días hábiles',
+    //           cost: 150,
+    //           estimatedDays: 3,
+    //           isFree: false
+    //         },
+    //         {
+    //           id: 'overnight',
+    //           name: 'Envío Nocturno',
+    //           description: 'Entrega al día siguiente',
+    //           cost: 250,
+    //           estimatedDays: 1,
+    //           isFree: false
+    //         }
+    //       ];
+    //     }
+    //   });
   }
 
   selectShippingMethod(method: ShippingMethod) {

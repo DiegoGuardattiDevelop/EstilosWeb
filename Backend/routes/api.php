@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\FooterController;
 use App\Http\Controllers\Api\PaymentController;
+use App\Http\Controllers\Api\ShippingController;
 
 Route::apiResource('categories', CategoryController::class);
 Route::apiResource('products', ProductController::class);
@@ -40,4 +41,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // Pagos
     Route::post('/create-payment-intent', [PaymentController::class, 'createPaymentIntent']);
     Route::post('/confirm-payment', [PaymentController::class, 'confirmPayment']);
+
+    // Envío - Rutas públicas para cálculo de costos
+    Route::get('/shipping-methods', [ShippingController::class, 'getShippingMethods']);
+    Route::post('/calculate-shipping', [ShippingController::class, 'calculateShippingCost']);
 });

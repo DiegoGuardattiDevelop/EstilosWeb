@@ -5,6 +5,7 @@ import { provideHttpClient, withInterceptors, withFetch } from '@angular/common/
 import { routes } from './app.routes';
 import { AuthInterceptor } from './services/auth.interceptor';
 import { OrderService } from './services/order.service';
+import { ShippingService } from './services/shipping.service';
 // import { AuthGuard } from './auth.guard';
 
 
@@ -17,6 +18,9 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient( withFetch(), withInterceptors([AuthInterceptor])),
     
     // Provee el servicio de órdenes
-    OrderService
+    OrderService,
+    
+    // Provee el servicio de envío
+    ShippingService
   ]
 };
