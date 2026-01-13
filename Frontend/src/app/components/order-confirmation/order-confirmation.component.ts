@@ -15,6 +15,9 @@ export class OrderConfirmationComponent implements OnInit {
   orderDetails: any = null;
   isLoading: boolean = true;
   errorMessage: string = '';
+  orderNumber: string = '';
+  orderDate: string = '';
+  estimatedDelivery: string = '';
 
   private orderService = inject(OrderService);
   
@@ -24,7 +27,9 @@ export class OrderConfirmationComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.orderId = this.route.snapshot.paramMap.get('orderId') || '';
+    // Obtener el ID de la orden de los parámetros de ruta o query params
+    this.orderId = this.route.snapshot.paramMap.get('orderId') ||
+                  this.route.snapshot.queryParamMap.get('orderId') || '';
     
     if (this.orderId) {
       this.loadOrderDetails();
@@ -39,6 +44,9 @@ export class OrderConfirmationComponent implements OnInit {
       next: (response: any) => {
         if (response.success) {
           this.orderDetails = response.order;
+          this.orderNumber = this.orderDetails.order_number || this.orderId;
+          this.orderDate = this.formatDate(this.orderDetails.created_at);
+          this.estimatedDelivery = this.calculateEstimatedDelivery(this.orderDetails.shipping_method?.estimatedDays);
         } else {
           this.errorMessage = response.message || 'Error al cargar los detalles del pedido';
         }
@@ -49,6 +57,33 @@ export class OrderConfirmationComponent implements OnInit {
         this.isLoading = false;
         console.error('Error loading order details:', error);
       }
+    });
+  }
+
+  formatDate(dateString: string): string {
+    if (!dateString) return '';
+    
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-ES', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  calculateEstimatedDelivery(days: number = 7): string {
+    if (!days) return 'Calculando...';
+    
+    const date = new Date();
+    date.setDate(date.getDate() + days);
+    return date.toLocaleDateString('es-ES', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
     });
   }
 

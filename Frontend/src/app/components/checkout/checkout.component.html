@@ -283,7 +283,7 @@
         <button
           class="btn-primary"
           (click)="nextStep()"
-          [disabled]="isLoading"
+          [disabled]="isNextButtonDisabled()"
         >
           <span *ngIf="currentStep < totalSteps">Siguiente →</span>
           <span *ngIf="currentStep === totalSteps">

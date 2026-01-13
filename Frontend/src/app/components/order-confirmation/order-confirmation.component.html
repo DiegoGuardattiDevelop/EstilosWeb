@@ -5,14 +5,15 @@
     </div>
     
     <h1>¡Gracias por tu compra!</h1>
-    <p class="order-number">Número de orden: <strong>{{ orderId }}</strong></p>
+    <p class="order-number">Número de orden: <strong>{{ orderNumber || orderId }}</strong></p>
+    <p class="order-date">Fecha de pedido: <strong>{{ orderDate }}</strong></p>
     
     <div class="confirmation-details">
       <div class="detail-card">
         <h3>Resumen de tu pedido</h3>
         <div class="items-list">
           <div class="item" *ngFor="let item of orderDetails.items">
-            <span class="item-name">{{ item.name }}</span>
+            <span class="item-name">{{ item.product_name }}</span>
             <span class="item-quantity">x{{ item.quantity }}</span>
             <span class="item-price">${{ item.price | number:'1.2-2' }}</span>
           </div>
@@ -21,15 +22,18 @@
         <div class="totals">
           <div class="total-row">
             <span>Subtotal</span>
-            <span>${{ orderDetails.total - 50 | number:'1.2-2' }}</span>
+            <span>${{ orderDetails.total_amount - (orderDetails.shipping_method?.cost || 0) | number:'1.2-2' }}</span>
           </div>
           <div class="total-row">
             <span>Envío</span>
-            <span>$50.00</span>
+            <span *ngIf="orderDetails.shipping_method?.isFree">GRATIS</span>
+            <span *ngIf="!orderDetails.shipping_method?.isFree">
+              ${{ orderDetails.shipping_method?.cost | number:'1.2-2' }}
+            </span>
           </div>
           <div class="total-row grand-total">
             <span>Total</span>
-            <span>${{ orderDetails.total | number:'1.2-2' }}</span>
+            <span>${{ orderDetails.total_amount | number:'1.2-2' }}</span>
           </div>
         </div>
       </div>
@@ -37,18 +41,30 @@
       <div class="detail-card">
         <h3>Información de envío</h3>
         <div class="shipping-info">
-          <p><strong>Método:</strong> {{ orderDetails.shipping.method }}</p>
-          <p><strong>Dirección:</strong> {{ orderDetails.shipping.address }}</p>
-          <p><strong>Entrega estimada:</strong> {{ orderDetails.shipping.estimatedDelivery }}</p>
+          <p><strong>Método:</strong> {{ orderDetails.shipping_method?.name || 'No especificado' }}</p>
+          <p><strong>Dirección:</strong>
+            {{ orderDetails.shipping_address?.street }},
+            {{ orderDetails.shipping_address?.city }},
+            {{ orderDetails.shipping_address?.state }}
+            {{ orderDetails.shipping_address?.zipCode }}
+          </p>
+          <p><strong>Entrega estimada:</strong> {{ estimatedDelivery }}</p>
+          <p><strong>Costo de envío:</strong>
+            <span *ngIf="orderDetails.shipping_method?.isFree">GRATIS</span>
+            <span *ngIf="!orderDetails.shipping_method?.isFree">
+              ${{ orderDetails.shipping_method?.cost | number:'1.2-2' }}
+            </span>
+          </p>
         </div>
       </div>
 
       <div class="detail-card">
         <h3>Estado del pedido</h3>
         <div class="status-badge">
-          <span class="status">{{ orderDetails.status }}</span>
+          <span class="status">{{ orderDetails.status || 'Procesando' }}</span>
         </div>
         <p class="status-text">Tu pago ha sido procesado exitosamente</p>
+        <p class="status-subtext">Recibirás un correo de confirmación con los detalles de tu pedido</p>
       </div>
     </div>
 
@@ -63,7 +79,7 @@
 
     <div class="help-info">
       <p>¿Tienes alguna pregunta? <a href="mailto:soporte@estilosweb.com">Contáctanos</a></p>
-      <p>Recibirás un correo de confirmación en tu email</p>
+      <p>Recibirás un correo de confirmación en tu email con los detalles de tu pedido</p>
     </div>
   </div>
 </div>

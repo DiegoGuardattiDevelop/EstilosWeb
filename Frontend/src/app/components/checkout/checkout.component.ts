@@ -200,55 +200,69 @@ export class CheckoutComponent implements OnInit, OnDestroy, AfterViewInit {
     this.isLoading = true;
     
     // Obtener datos del formulario para calcular envíos
-    const shippingData: ShippingRequest = {
-      country: this.shippingForm.get('country')?.value || 'MX',
-      state: this.shippingForm.get('state')?.value,
-      city: this.shippingForm.get('city')?.value,
-      zipCode: this.shippingForm.get('zipCode')?.value,
-      cartTotal: this.orderSummary.subtotal
-    };
+    const country = this.shippingForm.get('country')?.value || 'MX';
+    const state = this.shippingForm.get('state')?.value || '';
+    const city = this.shippingForm.get('city')?.value || '';
+    const zipCode = this.shippingForm.get('zipCode')?.value || '';
+    const cartTotal = this.orderSummary.subtotal;
 
-    // TODO: Implementar llamada al backend para obtener métodos de envío dinámicos
-    // this.http.get('/api/shipping-methods')
-    //   .pipe(takeUntil(this.destroy$))
-    //   .subscribe({
-    //     next: (methods: any) => {
-    //       this.shippingMethods = methods;
-    //       if (methods.length > 0) {
-    //         this.selectShippingMethod(methods[0]);
-    //       }
-    //     },
-    //     error: (error: any) => {
-    //       console.error('Error loading shipping methods:', error);
-    //       // Usar métodos estáticos de respaldo
-    //       this.shippingMethods = [
-    //         {
-    //           id: 'standard',
-    //           name: 'Envío Estándar',
-    //           description: '5-7 días hábiles',
-    //           cost: 50,
-    //           estimatedDays: 7,
-    //           isFree: false
-    //         },
-    //         {
-    //           id: 'express',
-    //           name: 'Envío Express',
-    //           description: '2-3 días hábiles',
-    //           cost: 150,
-    //           estimatedDays: 3,
-    //           isFree: false
-    //         },
-    //         {
-    //           id: 'overnight',
-    //           name: 'Envío Nocturno',
-    //           description: 'Entrega al día siguiente',
-    //           cost: 250,
-    //           estimatedDays: 1,
-    //           isFree: false
-    //         }
-    //       ];
-    //     }
-    //   });
+    // Intentar cargar métodos de envío desde el backend
+    this.http.get('/api/shipping-methods', {
+      params: {
+        country: country,
+        state: state,
+        city: city,
+        zipCode: zipCode,
+        cartTotal: cartTotal
+      }
+    })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (methods: any) => {
+          this.shippingMethods = methods;
+          if (methods.length > 0) {
+            this.selectShippingMethod(methods[0]);
+          }
+          this.isLoading = false;
+        },
+        error: (error: any) => {
+          console.error('Error loading shipping methods:', error);
+          // Usar métodos estáticos de respaldo si falla la carga desde el backend
+          this.shippingMethods = [
+            {
+              id: 'standard',
+              name: 'Envío Estándar',
+              description: '5-7 días hábiles',
+              cost: 50,
+              estimatedDays: 7,
+              isFree: false
+            },
+            {
+              id: 'express',
+              name: 'Envío Express',
+              description: '2-3 días hábiles',
+              cost: 150,
+              estimatedDays: 3,
+              isFree: false
+            },
+            {
+              id: 'overnight',
+              name: 'Envío Nocturno',
+              description: 'Entrega al día siguiente',
+              cost: 250,
+              estimatedDays: 1,
+              isFree: false
+            }
+          ];
+          
+          // Seleccionar el primer método de envío por defecto
+          if (this.shippingMethods.length > 0) {
+            this.selectShippingMethod(this.shippingMethods[0]);
+          }
+          
+          this.isLoading = false;
+        }
+      });
   }
 
   selectShippingMethod(method: ShippingMethod) {
@@ -273,6 +287,17 @@ export class CheckoutComponent implements OnInit, OnDestroy, AfterViewInit {
     } else if (this.currentStep === 3) {
       this.submitOrder();
     }
+  }
+
+  isNextButtonDisabled(): boolean {
+    if (this.currentStep === 1) {
+      return !this.shippingForm.valid || !this.selectedShipping || this.isLoading;
+    } else if (this.currentStep === 2) {
+      return this.isLoading;
+    } else if (this.currentStep === 3) {
+      return this.isLoading;
+    }
+    return true;
   }
 
   previousStep() {
@@ -340,9 +365,10 @@ export class CheckoutComponent implements OnInit, OnDestroy, AfterViewInit {
         };
 
         // Enviar al backend
+        let orderResponse: any = null;
         try {
-          const response = await this.http.post('/api/orders', orderData).toPromise();
-          console.log('Orden creada exitosamente:', response);
+          orderResponse = await this.http.post('/api/orders', orderData).toPromise();
+          console.log('Orden creada exitosamente:', orderResponse);
         } catch (error) {
           console.error('Error al crear la orden:', error);
           this.errorMessage = 'Error al procesar tu orden';
@@ -353,10 +379,14 @@ export class CheckoutComponent implements OnInit, OnDestroy, AfterViewInit {
         // Limpiar carrito
         this.cartService.clearCart();
 
-        // Redirigir a confirmación
-        this.router.navigate(['/order-confirmation'], {
-          queryParams: { orderId: 'ORD-' + Date.now() }
-        });
+        // Redirigir a confirmación con el ID real de la orden
+        if (orderResponse && orderResponse.order && orderResponse.order.id) {
+          this.router.navigate(['/order-confirmation', orderResponse.order.id]);
+        } else {
+          this.router.navigate(['/order-confirmation'], {
+            queryParams: { orderId: 'ORD-' + Date.now() }
+          });
+        }
       }
     } catch (error) {
       this.errorMessage = 'Error procesando el pago';
