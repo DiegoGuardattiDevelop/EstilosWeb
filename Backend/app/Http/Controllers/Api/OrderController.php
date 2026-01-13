@@ -22,15 +22,139 @@ class OrderController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        try {
+            $user = $request->user();
+
+            // Validar datos de entrada
+            $validated = $request->validate([
+                'address' => 'required|array',
+                'address.fullName' => 'required|string|min:3',
+                'address.email' => 'required|email',
+                'address.phone' => 'required|string',
+                'address.street' => 'required|string',
+                'address.city' => 'required|string',
+                'address.state' => 'required|string',
+                'address.zipCode' => 'required|string',
+                'address.country' => 'required|string',
+                'address.notes' => 'nullable|string',
+                'shipping' => 'required|array',
+                'shipping.id' => 'required|integer',
+                'shipping.name' => 'required|string',
+                'shipping.price' => 'required|numeric',
+                'shipping.estimatedDays' => 'required|integer',
+                'items' => 'required|array|min:1',
+                'items.*.product_id' => 'required|integer',
+                'items.*.product_name' => 'required|string',
+                'items.*.quantity' => 'required|integer|min:1',
+                'items.*.price' => 'required|numeric|min:0',
+                'total' => 'required|numeric|min:0'
+            ]);
+
+            // Crear la orden
+            $order = new Order();
+            $order->user_id = $user->id;
+            $order->order_number = 'ORD-' . strtoupper(uniqid());
+            $order->status = 'pending';
+            $order->total_amount = $validated['total'];
+            $order->shipping_address = json_encode($validated['address']);
+            $order->shipping_method = json_encode($validated['shipping']);
+            $order->save();
+
+            // Guardar los items de la orden
+            $orderItems = [];
+            foreach ($validated['items'] as $item) {
+                $orderItems[] = [
+                    'order_id' => $order->id,
+                    'product_id' => $item['product_id'],
+                    'product_name' => $item['product_name'],
+                    'quantity' => $item['quantity'],
+                    'price' => $item['price'],
+                    'total' => $item['price'] * $item['quantity'],
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ];
+            }
+
+            // Insertar items en la base de datos
+            \Illuminate\Support\Facades\DB::table('order_items')->insert($orderItems);
+
+            return response()->json([
+                'success' => true,
+                'order' => [
+                    'id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'status' => $order->status,
+                    'total_amount' => $order->total_amount,
+                    'created_at' => $order->created_at->toISOString()
+                ]
+            ], 201);
+        } catch (\Exception $e) {
+            Log::error('Error al crear orden: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al crear la orden',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Request $request, string $id)
     {
-        //
+        try {
+            $order = Order::where('id', $id)
+                ->orWhere('order_number', $id)
+                ->with(['items'])
+                ->first();
+
+            if (!$order) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Orden no encontrada'
+                ], 404);
+            }
+
+            // Verificar si el usuario tiene permiso para ver esta orden
+            $user = $request->user();
+            if ($user && $user->id !== $order->user_id && !$user->is_admin) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No autorizado para ver esta orden'
+                ], 403);
+            }
+
+            return response()->json([
+                'success' => true,
+                'order' => [
+                    'id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'status' => $order->status,
+                    'status_text' => $this->getStatusText($order->status),
+                    'total_amount' => (float) $order->total_amount,
+                    'shipping_address' => json_decode($order->shipping_address),
+                    'shipping_method' => json_decode($order->shipping_method),
+                    'created_at' => $order->created_at->toISOString(),
+                    'updated_at' => $order->updated_at->toISOString(),
+                    'items' => $order->items->map(function ($item) {
+                        return [
+                            'id' => $item->id,
+                            'product_name' => $item->product_name,
+                            'quantity' => (int) $item->quantity,
+                            'price' => (float) $item->price,
+                            'total' => (float) $item->total
+                        ];
+                    })->toArray()
+                ]
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error al obtener orden: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener la orden'
+            ], 500);
+        }
     }
 
     /**

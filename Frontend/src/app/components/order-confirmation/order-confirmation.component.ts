@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { Component, OnInit, inject } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { OrderService } from './../../services/order.service';
 
 @Component({
   selector: 'app-order-confirmation',
@@ -12,37 +13,51 @@ import { CommonModule } from '@angular/common';
 export class OrderConfirmationComponent implements OnInit {
   orderId: string = '';
   orderDetails: any = null;
+  isLoading: boolean = true;
+  errorMessage: string = '';
 
-  constructor(private route: ActivatedRoute) {}
+  private orderService = inject(OrderService);
+  
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router
+  ) {}
 
   ngOnInit() {
-    this.orderId = this.route.snapshot.queryParams['orderId'] || 'ORD-' + Date.now();
+    this.orderId = this.route.snapshot.paramMap.get('orderId') || '';
     
-    // Simular datos de orden (en producción vendría del backend)
-    this.orderDetails = {
-      orderId: this.orderId,
-      date: new Date().toLocaleDateString('es-ES'),
-      status: 'Pagado',
-      total: 1250.00,
-      items: [
-        { name: 'Camisa Casual', quantity: 1, price: 800.00 },
-        { name: 'Pantalón Jeans', quantity: 1, price: 450.00 }
-      ],
-      shipping: {
-        method: 'Envío Estándar',
-        address: 'Calle Principal 123, Ciudad, CP 12345',
-        estimatedDelivery: '5-7 días hábiles'
+    if (this.orderId) {
+      this.loadOrderDetails();
+    } else {
+      this.errorMessage = 'No se encontró el número de orden';
+      this.isLoading = false;
+    }
+  }
+
+  loadOrderDetails() {
+    this.orderService.getOrderDetails(this.orderId).subscribe({
+      next: (response: any) => {
+        if (response.success) {
+          this.orderDetails = response.order;
+        } else {
+          this.errorMessage = response.message || 'Error al cargar los detalles del pedido';
+        }
+        this.isLoading = false;
+      },
+      error: (error: any) => {
+        this.errorMessage = 'Error al conectar con el servidor';
+        this.isLoading = false;
+        console.error('Error loading order details:', error);
       }
-    };
+    });
   }
 
   trackOrder() {
-    // Lógica para rastrear pedido
-    console.log('Rastreando pedido:', this.orderId);
+    // Navegar a la página de seguimiento de pedido
+    this.router.navigate(['/order-tracking', this.orderId]);
   }
 
   continueShopping() {
-    // Redirigir al home
-    window.location.href = '/';
+    this.router.navigate(['/']);
   }
 }
