@@ -93,12 +93,26 @@ export class ProductsByCategoryComponent implements OnInit, OnDestroy {
     ).subscribe(params => {
       const newSlug = params.get('slug') || '';
       console.log('🔄 Slug actualizado:', newSlug);
-      
+       
       if (newSlug && newSlug !== this.categorySlug) {
         this.categorySlug = newSlug;
         this.loadCategoryAndProducts();
       }
     });
+  }
+
+  // ✅ Método para obtener el color de fondo según la categoría
+  getCategoryBackgroundColor(categorySlug: string): string {
+    const categoryColors: { [key: string]: string } = {
+      'mujer': '#f3c2b0',
+      'hombre': '#afcbc6',
+      'blanco': '#bfc8c7',
+      'lenceria': '#bb958b',
+      'infantil': '#d4cdbd',
+      'accesorios': '#d9cdba',
+      'outlet': '#CEBAE3'
+    };
+    return categoryColors[categorySlug] || '#ead3a3';
   }
 
   ngOnDestroy(): void {

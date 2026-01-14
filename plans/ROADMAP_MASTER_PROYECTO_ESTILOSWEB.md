@@ -126,7 +126,7 @@
 
 #### 7. **Mejora de Interfaz ProductsByCategory** 🟡
 
-- **Estado:** ❌ Pendiente
+- **Estado:** ✅ Completado
 - **Impacto:** Medio - UX mejorada
 - **Requerimientos:**
   - Alinear con lineamientos del HomeComponent

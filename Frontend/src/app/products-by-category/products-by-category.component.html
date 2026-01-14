@@ -1,173 +1,210 @@
 <div class="category-page" [ngClass]="categorySlug">
-    <div class="category-header" [ngClass]="categorySlug" [style.background-image]="'url(' + categoryService.getCategoryImageUrl(category?.image_url) + ')'">
-        <div class="category-header-overlay">
-            <button (click)="goBack()" class="back-button">
-                <i class="fas fa-arrow-left"></i>
-            </button>
-            <h1 class="section-title">{{ category?.name }}</h1>
-            <p class="section-subtitle">{{ category?.description_long }}</p>
-        </div>
+  <div
+    class="category-header"
+    [ngClass]="categorySlug"
+    [style.background-image]="
+      'url(' + categoryService.getCategoryImageUrl(category?.image_url) + ')'
+    "
+    [style.background-color]="getCategoryBackgroundColor(categorySlug)"
+  >
+    <div class="category-header-overlay">
+      <button (click)="goBack()" class="back-button">
+        <i class="fas fa-arrow-left"></i>
+      </button>
+      <h1 class="section-title">{{ category?.name }}</h1>
+      <p class="section-subtitle">{{ category?.description_long }}</p>
     </div>
+  </div>
 
-    @if (isLoading) {
-        <div class="loading-spinner">
-            <div class="spinner"></div>
-        </div>
-    }
-    
-    <!-- Barra de búsqueda principal - COMPACTA -->
-    <div class="search-bar-main">
-        <div class="search-input-wrapper">
-            <i class="fas fa-search"></i>
-            <input type="text"
-                   [(ngModel)]="filters.searchTerm"
-                   (ngModelChange)="applyFilters()"
-                   placeholder="Buscar productos..."
-                   class="search-input" />
-            @if (products.length > 0) {
-                <span class="results-count">
-                    {{ products.length }} resultados
-                </span>
-            }
-        </div>
+  @if (isLoading) {
+  <div class="loading-spinner">
+    <div class="spinner"></div>
+  </div>
+  }
+
+  <!-- Barra de búsqueda principal - COMPACTA -->
+  <div class="search-bar-main">
+    <div class="search-input-wrapper">
+      <i class="fas fa-search"></i>
+      <input
+        type="text"
+        [(ngModel)]="filters.searchTerm"
+        (ngModelChange)="applyFilters()"
+        placeholder="Buscar productos..."
+        class="search-input"
+      />
+      @if (products.length > 0) {
+      <span class="results-count"> {{ products.length }} resultados </span>
+      }
     </div>
-    
+  </div>
 
-    <!-- Chips de filtros activos -->
-    @if (hasActiveFilters()) {
-        <div class="active-filters">
-            <span class="filters-label">Filtros:</span>
-            <div class="filter-chips">
-                @if (filters.minPrice) {
-                    <div class="chip">
-                        Desde ${{ filters.minPrice }}
-                        <button (click)="clearFilter('minPrice')" class="chip-close">&times;</button>
-                    </div>
-                }
-                @if (filters.maxPrice) {
-                    <div class="chip">
-                        Hasta ${{ filters.maxPrice }}
-                        <button (click)="clearFilter('maxPrice')" class="chip-close">&times;</button>
-                    </div>
-                }
-                @if (filters.sortBy !== 'created_at') {
-                    <div class="chip">
-                        {{ filters.sortBy === 'price' ? 'Precio' : 'Nombre' }}
-                        <button (click)="clearFilter('sort')" class="chip-close">&times;</button>
-                    </div>
-                }
-                @if (filters.size) {
-                    <div class="chip">
-                        Talle: {{ filters.size }}
-                        <button (click)="clearFilter('size')" class="chip-close">&times;</button>
-                    </div>
-                }
-                <button class="clear-all-btn" (click)="clearAllFilters()">✕ Limpiar</button>
-            </div>
-        </div>
-    }
-    
-    <!-- Panel de filtros COMPACTO -->
-    <div class="filters-bar">
-        <button class="filters-toggle-btn" (click)="toggleFilters()">
-            <i class="fas" [ngClass]="showFilters ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
-            Filtros
+  <!-- Chips de filtros activos -->
+  @if (hasActiveFilters()) {
+  <div class="active-filters">
+    <span class="filters-label">Filtros:</span>
+    <div class="filter-chips">
+      @if (filters.minPrice) {
+      <div class="chip">
+        Desde ${{ filters.minPrice }}
+        <button (click)="clearFilter('minPrice')" class="chip-close">
+          &times;
         </button>
-
-        @if (showFilters) {
-            <div class="filters-panel">
-                <!-- Filtro de precio -->
-                <div class="filter-group">
-                    <label class="filter-label">
-                        <i class="fas fa-dollar-sign"></i> Precio
-                    </label>
-                    <div class="price-inputs">
-                        <input type="number" 
-                               [(ngModel)]="filters.minPrice" 
-                               (ngModelChange)="applyFilters()" 
-                               placeholder="Mín" 
-                               class="price-field" />
-                        <span>-</span>
-                        <input type="number" 
-                               [(ngModel)]="filters.maxPrice" 
-                               (ngModelChange)="applyFilters()" 
-                               placeholder="Máx" 
-                               class="price-field" />
-                    </div>
-                </div>
-
-                <!-- Filtro de ordenamiento -->
-                <div class="filter-group">
-                    <label class="filter-label">
-                        <i class="fas fa-sort"></i> Ordenar
-                    </label>
-                    <select [(ngModel)]="filters.sortBy" (change)="applyFilters()" class="sort-select">
-                        <option value="created_at">Recientes</option>
-                        <option value="price">Precio</option>
-                        <option value="name">Nombre</option>
-                    </select>
-                    <select [(ngModel)]="filters.sortOrder" (change)="applyFilters()" class="sort-select">
-                        <option value="asc">↑ Asc</option>
-                        <option value="desc">↓ Desc</option>
-                    </select>
-                </div>
-                
-                <!-- Filtro por talle -->
-                <div class="filter-group">
-                    <label class="filter-label">
-                        <i class="fas fa-ruler"></i> Talle
-                    </label>
-                    <select [(ngModel)]="filters.size" (change)="applyFilters()" class="sort-select">
-                        <option value="">Todos</option>
-                        <option value="XS">XS</option>
-                        <option value="S">S</option>
-                        <option value="M">M</option>
-                        <option value="L">L</option>
-                        <option value="XL">XL</option>
-                        <option value="XXL">XXL</option>
-                        <option value="XXXL">XXXL</option>
-                    </select>
-                </div>
-            </div>
-        }
+      </div>
+      } @if (filters.maxPrice) {
+      <div class="chip">
+        Hasta ${{ filters.maxPrice }}
+        <button (click)="clearFilter('maxPrice')" class="chip-close">
+          &times;
+        </button>
+      </div>
+      } @if (filters.sortBy !== 'created_at') {
+      <div class="chip">
+        {{ filters.sortBy === "price" ? "Precio" : "Nombre" }}
+        <button (click)="clearFilter('sort')" class="chip-close">
+          &times;
+        </button>
+      </div>
+      } @if (filters.size) {
+      <div class="chip">
+        Talle: {{ filters.size }}
+        <button (click)="clearFilter('size')" class="chip-close">
+          &times;
+        </button>
+      </div>
+      }
+      <button class="clear-all-btn" (click)="clearAllFilters()">
+        ✕ Limpiar
+      </button>
     </div>
-       
-    @if (products.length > 0) {
-        <div class="products-grid">
-            @for (product of products; track product.id) {
-                <div class="product-card">
-                    <div class="product-image-wrapper">
-                        <img [src]="getProductImageUrl(product.image_url)" [alt]="product.name" class="product-image">
-                    </div>
-                    <div class="product-content">
-                        <h3>{{ product.name }}</h3>
-                        <p>{{ product.description }}</p>
-                    </div>
-                    <div class="product-badge">
-                        {{ product.price | currency:'USD':'symbol':'1.2-2' }}
-                    </div>
-                </div>
-            }
+  </div>
+  }
+
+  <!-- Panel de filtros COMPACTO -->
+  <div class="filters-bar">
+    <button class="filters-toggle-btn" (click)="toggleFilters()">
+      <i
+        class="fas"
+        [ngClass]="showFilters ? 'fa-chevron-up' : 'fa-chevron-down'"
+      ></i>
+      Filtros
+    </button>
+
+    @if (showFilters) {
+    <div class="filters-panel">
+      <!-- Filtro de precio -->
+      <div class="filter-group">
+        <label class="filter-label">
+          <i class="fas fa-dollar-sign"></i> Precio
+        </label>
+        <div class="price-inputs">
+          <input
+            type="number"
+            [(ngModel)]="filters.minPrice"
+            (ngModelChange)="applyFilters()"
+            placeholder="Mín"
+            class="price-field"
+          />
+          <span>-</span>
+          <input
+            type="number"
+            [(ngModel)]="filters.maxPrice"
+            (ngModelChange)="applyFilters()"
+            placeholder="Máx"
+            class="price-field"
+          />
         </div>
-    } @else {
-        <div class="no-products-message">
-            <p>No se encontraron productos para esta categoría.</p>
-        </div>
+      </div>
+
+      <!-- Filtro de ordenamiento -->
+      <div class="filter-group">
+        <label class="filter-label">
+          <i class="fas fa-sort"></i> Ordenar
+        </label>
+        <select
+          [(ngModel)]="filters.sortBy"
+          (change)="applyFilters()"
+          class="sort-select"
+        >
+          <option value="created_at">Recientes</option>
+          <option value="price">Precio</option>
+          <option value="name">Nombre</option>
+        </select>
+        <select
+          [(ngModel)]="filters.sortOrder"
+          (change)="applyFilters()"
+          class="sort-select"
+        >
+          <option value="asc">↑ Asc</option>
+          <option value="desc">↓ Desc</option>
+        </select>
+      </div>
+
+      <!-- Filtro por talle -->
+      <div class="filter-group">
+        <label class="filter-label"> <i class="fas fa-ruler"></i> Talle </label>
+        <select
+          [(ngModel)]="filters.size"
+          (change)="applyFilters()"
+          class="sort-select"
+        >
+          <option value="">Todos</option>
+          <option value="XS">XS</option>
+          <option value="S">S</option>
+          <option value="M">M</option>
+          <option value="L">L</option>
+          <option value="XL">XL</option>
+          <option value="XXL">XXL</option>
+          <option value="XXXL">XXXL</option>
+        </select>
+      </div>
+    </div>
+    }
+  </div>
+
+  @if (products.length > 0) {
+  <div class="products-grid">
+    @for (product of products; track product.id) {
+    <div class="product-card">
+      <div class="product-image-wrapper">
+        <img
+          [src]="getProductImageUrl(product.image_url)"
+          [alt]="product.name"
+          class="product-image"
+        />
+      </div>
+      <div class="product-content">
+        <h3>{{ product.name }}</h3>
+        <p>{{ product.description }}</p>
+      </div>
+      <div class="product-badge">
+        {{ product.price | currency : "USD" : "symbol" : "1.2-2" }}
+      </div>
+    </div>
+    }
+  </div>
+  } @else {
+  <div class="no-products-message">
+    <p>No se encontraron productos para esta categoría.</p>
+  </div>
+  } @if (totalPages > 1 && !isLoading) {
+  <div class="pagination">
+    <button (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">
+      Anterior
+    </button>
+
+    @for (page of paginationRange; track page) {
+    <button [class.active]="page === currentPage" (click)="goToPage(page)">
+      {{ page }}
+    </button>
     }
 
-    @if (totalPages > 1 && !isLoading) {
-        <div class="pagination">
-            <button (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">Anterior</button>
-
-            @for (page of paginationRange; track page) {
-                <button
-                [class.active]="page === currentPage"
-                (click)="goToPage(page)">
-                {{ page }}
-                </button>
-            }
-
-            <button (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages">Siguiente</button>
-        </div>
-    }
+    <button
+      (click)="goToPage(currentPage + 1)"
+      [disabled]="currentPage === totalPages"
+    >
+      Siguiente
+    </button>
+  </div>
+  }
 </div>
