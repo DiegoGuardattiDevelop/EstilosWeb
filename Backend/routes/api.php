@@ -20,9 +20,6 @@ Route::post('login', [AuthController::class, 'login']);
 
 Route::get('/footer-data', [FooterController::class, 'getFooterData']);
 
-// Rutas de pagos (sin auth para crear intent, pero confirm con auth)
-Route::post('/create-payment-intent', [PaymentController::class, 'createPaymentIntent']);
-
 Route::middleware('auth:sanctum')->group(function () {
 
     // Carrito
@@ -44,7 +41,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/create-payment-intent', [PaymentController::class, 'createPaymentIntent']);
     Route::post('/confirm-payment', [PaymentController::class, 'confirmPayment']);
 
-    // Envío - Rutas públicas para cálculo de costos
+    // Envío
     Route::get('/shipping-methods', [ShippingController::class, 'getShippingMethods']);
     Route::post('/calculate-shipping', [ShippingController::class, 'calculateShippingCost']);
 });

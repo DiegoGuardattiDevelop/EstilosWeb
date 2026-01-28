@@ -62,6 +62,7 @@
 - **Impacto:** Alto - Afecta cálculo de totales
 - **ShippingController:** Implementado con 3 métodos (Estándar, Express, Nocturno)
 - **ShippingService:** Integrado en frontend
+- **Rutas:** Protegidas por auth:sanctum (requiere login para ver opciones de envío)
 - **Esfuerzo:** 4 horas - COMPLETADO
 
 #### 2. **Página de Confirmación de Pedido Real** 🟠
