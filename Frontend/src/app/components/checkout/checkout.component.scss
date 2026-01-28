@@ -8,7 +8,7 @@ $text-light: #666;
 $border-color: #e0e0e0;
 $transition: all 0.3s ease;
 
-@use 'sass:color';
+@use "sass:color";
 
 .checkout-container {
   max-width: 1200px;
@@ -105,7 +105,7 @@ $transition: all 0.3s ease;
       color: white;
 
       &::after {
-        content: '✓';
+        content: "✓";
       }
     }
 
@@ -564,4 +564,134 @@ hr {
   color: $error-color;
   font-size: 0.875rem;
   margin-top: 4px;
+}
+
+// ============================================
+// NUEVO INDICADOR DE PROGRESO VISUAL
+// ============================================
+
+.checkout-progress {
+  margin-bottom: 2rem;
+  padding: 0 1rem;
+
+  .progress-bar {
+    height: 4px;
+    background: #e0e0e0;
+    border-radius: 2px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+      transition: width 0.3s ease;
+      border-radius: 2px;
+    }
+  }
+
+  .steps-indicator {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 500px;
+    margin: 0 auto;
+
+    .step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      flex: 1;
+
+      .step-circle {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #fff;
+        border: 3px solid #e0e0e0;
+        color: #e0e0e0;
+        transition: all 0.3s ease;
+        z-index: 2;
+
+        i {
+          font-size: 1.2rem;
+        }
+      }
+
+      .step-label {
+        margin-top: 0.5rem;
+        font-size: 0.85rem;
+        color: #999;
+        font-weight: 500;
+        transition: color 0.3s ease;
+      }
+
+      &.active {
+        .step-circle {
+          border-color: #667eea;
+          color: #667eea;
+          background: #fff;
+          box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+        }
+
+        .step-label {
+          color: #667eea;
+          font-weight: 600;
+        }
+      }
+
+      &.completed {
+        .step-circle {
+          background: #667eea;
+          border-color: #667eea;
+          color: #fff;
+        }
+
+        .step-label {
+          color: #667eea;
+        }
+      }
+
+      // Conectar pasos
+      &:not(:last-child)::after {
+        content: "";
+        position: absolute;
+        top: 25px;
+        left: 50%;
+        width: 100%;
+        height: 3px;
+        background: #e0e0e0;
+        z-index: 1;
+      }
+
+      &.completed:not(:last-child)::after {
+        background: #667eea;
+      }
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .checkout-progress {
+    .steps-indicator {
+      .step {
+        .step-circle {
+          width: 40px;
+          height: 40px;
+
+          i {
+            font-size: 1rem;
+          }
+        }
+
+        .step-label {
+          font-size: 0.75rem;
+        }
+      }
+    }
+  }
 }

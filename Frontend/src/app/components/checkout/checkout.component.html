@@ -5,21 +5,53 @@
     <p class="step-indicator">Paso {{ currentStep }} de {{ totalSteps }}</p>
   </div>
 
-  <!-- Indicador de pasos -->
-  <div class="steps-indicator">
-    <div class="step" [class.active]="currentStep >= 1" [class.completed]="currentStep > 1">
-      <div class="step-number">1</div>
-      <span class="step-label">Envío</span>
+  <!-- Indicador de progreso visual -->
+  <div class="checkout-progress">
+    <div class="progress-bar">
+      <div
+        class="progress-fill"
+        [style.width.%]="((currentStep - 1) / (totalSteps - 1)) * 100"
+      ></div>
     </div>
-    <div class="step-connector" [class.active]="currentStep > 1"></div>
-    <div class="step" [class.active]="currentStep >= 2" [class.completed]="currentStep > 2">
-      <div class="step-number">2</div>
-      <span class="step-label">Confirmación</span>
-    </div>
-    <div class="step-connector" [class.active]="currentStep > 2"></div>
-    <div class="step" [class.active]="currentStep >= 3">
-      <div class="step-number">3</div>
-      <span class="step-label">Pago</span>
+    <div class="steps-indicator">
+      <div
+        class="step"
+        [class.active]="currentStep >= 1"
+        [class.completed]="currentStep > 1"
+      >
+        <div class="step-circle">
+          <i
+            class="fas"
+            [class.fa-check]="currentStep > 1"
+            [class.fa-truck]="currentStep === 1"
+          ></i>
+        </div>
+        <span class="step-label">Envío</span>
+      </div>
+      <div
+        class="step"
+        [class.active]="currentStep >= 2"
+        [class.completed]="currentStep > 2"
+      >
+        <div class="step-circle">
+          <i
+            class="fas"
+            [class.fa-check]="currentStep > 2"
+            [class.fa-credit-card]="currentStep <= 2"
+          ></i>
+        </div>
+        <span class="step-label">Pago</span>
+      </div>
+      <div class="step" [class.active]="currentStep >= 3">
+        <div class="step-circle">
+          <i
+            class="fas"
+            [class.fa-check-circle]="currentStep > 3"
+            [class.fa-check]="currentStep === 3"
+          ></i>
+        </div>
+        <span class="step-label">Confirmación</span>
+      </div>
     </div>
   </div>
 
@@ -48,8 +80,11 @@
                 [class.is-invalid]="isFieldInvalid('firstName', shippingForm)"
                 placeholder="Juan"
               />
-              <span class="error-text" *ngIf="isFieldInvalid('firstName', shippingForm)">
-                {{ getFieldError('firstName', shippingForm) }}
+              <span
+                class="error-text"
+                *ngIf="isFieldInvalid('firstName', shippingForm)"
+              >
+                {{ getFieldError("firstName", shippingForm) }}
               </span>
             </div>
             <div class="form-group">
@@ -61,8 +96,11 @@
                 [class.is-invalid]="isFieldInvalid('lastName', shippingForm)"
                 placeholder="Pérez"
               />
-              <span class="error-text" *ngIf="isFieldInvalid('lastName', shippingForm)">
-                {{ getFieldError('lastName', shippingForm) }}
+              <span
+                class="error-text"
+                *ngIf="isFieldInvalid('lastName', shippingForm)"
+              >
+                {{ getFieldError("lastName", shippingForm) }}
               </span>
             </div>
           </div>
@@ -78,8 +116,11 @@
                 [class.is-invalid]="isFieldInvalid('email', shippingForm)"
                 placeholder="juan@example.com"
               />
-              <span class="error-text" *ngIf="isFieldInvalid('email', shippingForm)">
-                {{ getFieldError('email', shippingForm) }}
+              <span
+                class="error-text"
+                *ngIf="isFieldInvalid('email', shippingForm)"
+              >
+                {{ getFieldError("email", shippingForm) }}
               </span>
             </div>
             <div class="form-group">
@@ -91,8 +132,11 @@
                 [class.is-invalid]="isFieldInvalid('phone', shippingForm)"
                 placeholder="+1 234 567 8900"
               />
-              <span class="error-text" *ngIf="isFieldInvalid('phone', shippingForm)">
-                {{ getFieldError('phone', shippingForm) }}
+              <span
+                class="error-text"
+                *ngIf="isFieldInvalid('phone', shippingForm)"
+              >
+                {{ getFieldError("phone", shippingForm) }}
               </span>
             </div>
           </div>
@@ -107,8 +151,11 @@
               [class.is-invalid]="isFieldInvalid('address', shippingForm)"
               placeholder="Calle Principal 123"
             />
-            <span class="error-text" *ngIf="isFieldInvalid('address', shippingForm)">
-              {{ getFieldError('address', shippingForm) }}
+            <span
+              class="error-text"
+              *ngIf="isFieldInvalid('address', shippingForm)"
+            >
+              {{ getFieldError("address", shippingForm) }}
             </span>
           </div>
 
@@ -134,8 +181,11 @@
                 [class.is-invalid]="isFieldInvalid('city', shippingForm)"
                 placeholder="México"
               />
-              <span class="error-text" *ngIf="isFieldInvalid('city', shippingForm)">
-                {{ getFieldError('city', shippingForm) }}
+              <span
+                class="error-text"
+                *ngIf="isFieldInvalid('city', shippingForm)"
+              >
+                {{ getFieldError("city", shippingForm) }}
               </span>
             </div>
             <div class="form-group">
@@ -147,8 +197,11 @@
                 [class.is-invalid]="isFieldInvalid('state', shippingForm)"
                 placeholder="CDMX"
               />
-              <span class="error-text" *ngIf="isFieldInvalid('state', shippingForm)">
-                {{ getFieldError('state', shippingForm) }}
+              <span
+                class="error-text"
+                *ngIf="isFieldInvalid('state', shippingForm)"
+              >
+                {{ getFieldError("state", shippingForm) }}
               </span>
             </div>
             <div class="form-group">
@@ -160,8 +213,11 @@
                 [class.is-invalid]="isFieldInvalid('zipCode', shippingForm)"
                 placeholder="06500"
               />
-              <span class="error-text" *ngIf="isFieldInvalid('zipCode', shippingForm)">
-                {{ getFieldError('zipCode', shippingForm) }}
+              <span
+                class="error-text"
+                *ngIf="isFieldInvalid('zipCode', shippingForm)"
+              >
+                {{ getFieldError("zipCode", shippingForm) }}
               </span>
             </div>
           </div>
@@ -185,7 +241,9 @@
                 />
                 <label [for]="'shipping-' + method.id" class="method-label">
                   <span class="method-name">{{ method.name }}</span>
-                  <span class="method-description">{{ method.description }}</span>
+                  <span class="method-description">{{
+                    method.description
+                  }}</span>
                   <span class="method-cost">${{ method.cost }}</span>
                 </label>
               </div>
@@ -200,34 +258,39 @@
         <div class="confirmation-section">
           <h3>Envío a:</h3>
           <p class="confirmation-text">
-            <strong>{{ shippingForm.get('firstName')?.value }} {{ shippingForm.get('lastName')?.value }}</strong>
+            <strong
+              >{{ shippingForm.get("firstName")?.value }}
+              {{ shippingForm.get("lastName")?.value }}</strong
+            >
           </p>
           <p class="confirmation-text">
-            {{ shippingForm.get('address')?.value }}
+            {{ shippingForm.get("address")?.value }}
             <span *ngIf="shippingForm.get('apartment')?.value">
-              , {{ shippingForm.get('apartment')?.value }}
+              , {{ shippingForm.get("apartment")?.value }}
             </span>
           </p>
           <p class="confirmation-text">
-            {{ shippingForm.get('city')?.value }}, {{ shippingForm.get('state')?.value }}
-            {{ shippingForm.get('zipCode')?.value }}
+            {{ shippingForm.get("city")?.value }},
+            {{ shippingForm.get("state")?.value }}
+            {{ shippingForm.get("zipCode")?.value }}
           </p>
         </div>
 
         <div class="confirmation-section">
           <h3>Contacto:</h3>
           <p class="confirmation-text">
-            {{ shippingForm.get('email')?.value }}
+            {{ shippingForm.get("email")?.value }}
           </p>
           <p class="confirmation-text">
-            {{ shippingForm.get('phone')?.value }}
+            {{ shippingForm.get("phone")?.value }}
           </p>
         </div>
 
         <div class="confirmation-section">
           <h3>Método de Envío:</h3>
           <p class="confirmation-text">
-            <strong>{{ selectedShipping?.name }}</strong> - {{ selectedShipping?.description }}
+            <strong>{{ selectedShipping?.name }}</strong> -
+            {{ selectedShipping?.description }}
           </p>
           <p class="confirmation-text">Costo: ${{ selectedShipping?.cost }}</p>
         </div>
@@ -239,18 +302,18 @@
 
         <!-- CORREGIR ESTO: Formulario con formGroup -->
         <form [formGroup]="paymentForm" (ngSubmit)="submitOrder()">
-          
           <!-- Datos del usuario -->
           <div class="form-group">
             <label for="cardName">Nombre en la tarjeta</label>
-            <input 
-              type="text" 
-              id="cardName" 
+            <input
+              type="text"
+              id="cardName"
               formControlName="cardName"
               class="form-control"
-              placeholder="Ej: Juan Pérez">
+              placeholder="Ej: Juan Pérez"
+            />
           </div>
-          
+
           <!-- Elemento Stripe -->
           <div class="form-group">
             <label for="card-element">Tarjeta de crédito</label>
@@ -260,13 +323,14 @@
               Los datos de la tarjeta se procesan de forma segura con Stripe
             </small>
           </div>
-          
+
           <!-- Botón de pago -->
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             class="btn btn-primary btn-block"
-            [disabled]="!paymentForm.valid || isLoading">
-            {{ isLoading ? 'Procesando...' : 'Pagar $' + orderSummary.total }}
+            [disabled]="!paymentForm.valid || isLoading"
+          >
+            {{ isLoading ? "Procesando..." : "Pagar $" + orderSummary.total }}
           </button>
         </form>
       </div>
@@ -307,12 +371,14 @@
 
       <!-- Items en el carrito -->
       <div class="summary-items">
-        <div class="summary-item" *ngFor="let item of (cartItems$ | async)">
+        <div class="summary-item" *ngFor="let item of cartItems$ | async">
           <div class="item-info">
-            <span class="item-name">{{ item.product.name || 'Producto' }}</span>
+            <span class="item-name">{{ item.product.name || "Producto" }}</span>
             <span class="item-qty">x{{ item.quantity }}</span>
           </div>
-          <span class="item-price">${{ (item.price * item.quantity).toFixed(2) }}</span>
+          <span class="item-price"
+            >${{ (item.price * item.quantity).toFixed(2) }}</span
+          >
         </div>
       </div>
 
