@@ -2,9 +2,9 @@
 
 ## Documento Maestro Consolidado de Desarrollo
 
-**Fecha:** 13 de enero de 2026
-**Versión:** 2.0 - Post-Stripe Integration
-**Estado del Proyecto:** 85% Completo - MVP Funcional con Revenue
+**Fecha:** 28 de enero de 2026
+**Versión:** 2.1 - Post-Route Fix
+**Estado del Proyecto:** 87% Completo - Checkout Flow Completo
 
 ---
 
@@ -56,37 +56,43 @@
 
 ### 🔥 **CRÍTICO - Revenue Blockers (Implementar AHORA)**
 
-#### 1. **Envío Dinámico del Backend** 🔴
+#### 1. **Envío Dinámico del Backend** ✅
 
-- **Estado:** ❌ Pendiente
+- **Estado:** ✅ Completado
 - **Impacto:** Alto - Afecta cálculo de totales
-- **Archivo:** `GUIA_PRACTICA_IMPLEMENTACION_CODIGO.md` (líneas 805, 853)
-- **Esfuerzo:** 4 horas
-- **Prioridad:** CRÍTICA
+- **ShippingController:** Implementado con 3 métodos (Estándar, Express, Nocturno)
+- **ShippingService:** Integrado en frontend
+- **Esfuerzo:** 4 horas - COMPLETADO
 
-#### 2. **Página de Confirmación de Pedido Real** 🔴
+#### 2. **Página de Confirmación de Pedido Real** 🟠
 
-- **Estado:** ❌ Pendiente (actualmente redirige a home)
+- **Estado:** ✅ Implementada - Falta testing
 - **Impacto:** Alto - UX de conversión
+- **Archivos:**
+  - [`order-confirmation.component.ts`](Frontend/src/app/components/order-confirmation/order-confirmation.component.ts)
+  - [`order-confirmation.component.html`](Frontend/src/app/components/order-confirmation/order-confirmation.component.html)
 - **Requerimientos:**
-  - Número de orden visible
-  - Resumen completo de compra
-  - Información de envío
-  - Email de confirmación
-  - Botón "Rastrear Pedido"
-- **Esfuerzo:** 3 horas
-- **Prioridad:** CRÍTICA
+  - [x] Número de orden visible
+  - [x] Resumen completo de compra
+  - [x] Información de envío
+  - [ ] Email de confirmación
+  - [ ] Botón "Rastrear Pedido" (integrado)
+- **Esfuerzo:** 3 horas - 90% COMPLETADO
+- **Prioridad:** MEDIA - Necesita testing
 
-#### 3. **Tracking de Órdenes** 🔴
+#### 3. **Tracking de Órdenes** 🟠
 
-- **Estado:** ❌ Pendiente
+- **Estado:** ✅ Implementado - Falta testing
 - **Impacto:** Medio - Customer service
+- **Archivos:**
+  - [`order-tracking.component.ts`](Frontend/src/app/components/order-tracking/order-tracking.component.ts)
+  - [`order-tracking.component.html`](Frontend/src/app/components/order-tracking/order-tracking.component.html)
 - **Requerimientos:**
-  - Página de estado del pedido
-  - Historial en perfil de usuario
-  - Integración con backend orders
-- **Esfuerzo:** 4 horas
-- **Prioridad:** CRÍTICA
+  - [x] Página de estado del pedido
+  - [ ] Historial en perfil de usuario
+  - [x] Integración con backend orders
+- **Esfuerzo:** 4 horas - 80% COMPLETADO
+- **Prioridad:** MEDIA - Necesita testing
 
 ### ⚠️ **IMPORTANTE - Conversion Optimizers**
 
@@ -212,8 +218,8 @@
 | **Stripe Integration**  | ✅ Completo  | +100% (de $0)    | $4,050         |
 | **Checkout Multi-paso** | ✅ Completo  | +15-20%          | Incluido       |
 | **Envío Dinámico**      | ✅ Completo  | +8%              | +$1,000        |
-| **Página Confirmación** | ❌ Pendiente | +5%              | +$600          |
-| **Protección Abandono** | ❌ Pendiente | +3-5%            | +$400          |
+| **Página Confirmación** | ✅ 90%       | +5%              | +$600          |
+| **Tracking de Órdenes** | ✅ 80%       | +3%              | +$400          |
 | **Indicador Progreso**  | ❌ Pendiente | +2%              | +$250          |
 | **Stock por Variante**  | ❌ Pendiente | +1-2%            | +$200          |
 | **TOTAL PROYECTADO**    |              |                  | **$6,500/mes** |
@@ -275,12 +281,14 @@
 
 ## 🎯 **PRÓXIMOS HITOS**
 
-### **Hito 1: MVP Revenue-Ready (1 semana)**
+### **Hito 1: MVP Revenue-Ready (COMPLETADO)**
 
 - ✅ Stripe integration completada
 - ✅ Envío dinámico implementado
-- ⏳ 2 tareas críticas pendientes
-- 🎯 Meta: $4,050/mes en revenue
+- ✅ OrderConfirmation implementado
+- ✅ OrderTracking implementado
+- ✅ Rutas API completadas
+- 🎯 Meta: $4,050/mes en revenue - **LISTO PARA TESTING**
 
 ### **Hito 2: Conversion Optimized (2 semanas)**
 
@@ -314,8 +322,8 @@
 
 ## 🚀 **ACCIÓN INMEDIATA RECOMENDADA**
 
-1. **HOY:** Revisar y completar las 3 tareas críticas (11 horas)
-2. **MAÑANA:** Implementar envío dinámico del backend
+1. **HOY:** Testing del flujo checkout completo (2 horas)
+2. **MAÑANA:** Corrección de bugs encontrados
 3. **Esta semana:** Deploy del MVP revenue-ready
 4. **Próxima semana:** Métricas y optimización de conversión
 
@@ -326,9 +334,9 @@
 ## 📞 **SOPORTE Y CONTACTO**
 
 - **Repositorio:** https://github.com/DiegoGuardattiDevelop/EstilosWeb
-- **Branch actual:** develop (post-Stripe integration)
-- **Último commit:** Fix: Corregidos enlaces de categorías en home y productos por categoría
-- **Estado:** Ready para revenue generation
+- **Branch actual:** feature/completar-checkout-flow
+- **Último commit:** feat(orders): agregar rutas faltantes para show y history
+- **Estado:** Listo para testing del flujo checkout
 
 ---
 
