@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -9,6 +9,7 @@ import { AuthService } from '../../services/auth.service';
 import { PaymentService } from '../../services/payment.service';
 import { CartItem } from '../../models/cart-item.model';
 import { loadStripe, Stripe, StripeElements, StripeCardElement } from '@stripe/stripe-js';
+import { CartAbandonmentModalComponent } from '../cart-abandonment-modal/cart-abandonment-modal.component';
 
 interface ShippingMethod {
   id: string;
@@ -37,7 +38,7 @@ interface OrderSummary {
 @Component({
   selector: 'app-checkout',
   standalone: true,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule, CartAbandonmentModalComponent],
   templateUrl: './checkout.component.html',
   styleUrls: ['./checkout.component.scss']
 })
@@ -96,7 +97,14 @@ export class CheckoutComponent implements OnInit, OnDestroy, AfterViewInit {
 
   // Referencia al elemento DOM de Stripe
   @ViewChild('cardElement') cardElementRef!: ElementRef;
-
+  
+  // Modal de abandono de carrito
+  @ViewChild(CartAbandonmentModalComponent) abandonmentModal!: CartAbandonmentModalComponent;
+  
+  // Estado para evitar bucle de confirmación
+  private isNavigatingAway = false;
+  private hasFormChanges = false;
+  
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -114,6 +122,96 @@ export class CheckoutComponent implements OnInit, OnDestroy, AfterViewInit {
     this.initializeForms();
     this.calculateOrderSummary();
     this.loadShippingMethods();
+    this.setupFormChangeDetection();
+    this.setupAbandonmentTracking();
+  }
+
+  /**
+   * Detecta cambios en el formulario para activar la protección de abandono
+   */
+  private setupFormChangeDetection(): void {
+    this.shippingForm.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.hasFormChanges = true;
+    });
+  }
+
+  /**
+   * Configura el tracking de abandono de carrito
+   */
+  private setupAbandonmentTracking(): void {
+    // Abrir modal cuando el usuario intenta salir del checkout
+    this.router.events.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      if (this.hasFormChanges && !this.isNavigatingAway) {
+        // Verificar si hay productos en el carrito
+        this.cartItems$.pipe(takeUntil(this.destroy$)).subscribe(items => {
+          if (items.length > 0 && !this.abandonmentModal?.wasShownInSession()) {
+            this.abandonmentModal?.open();
+          }
+        });
+      }
+    });
+  }
+
+  /**
+   * Maneja el intento de salida del checkout
+   */
+  onAbandonmentConfirmed(): void {
+    this.isNavigatingAway = true;
+    
+    // Registrar abandono en analytics
+    this.trackAbandonment();
+    
+    // Registrar carrito abandonado en backend
+    this.registerAbandonedCart();
+  }
+
+  /**
+   * Registra el abandono del carrito en el backend
+   */
+  private registerAbandonedCart(): void {
+    const email = this.shippingForm.get('email')?.value;
+    
+    // Obtener items del carrito
+    this.cartService.getCartItems().pipe(takeUntil(this.destroy$)).subscribe(items => {
+      if (email && items.length > 0) {
+        this.http.post('/api/cart-abandonment', {
+          email: email,
+          cartItems: items,
+          checkoutStep: this.currentStep,
+          timestamp: new Date().toISOString()
+        }).subscribe({
+          next: () => console.log('Carrito abandonado registrado'),
+          error: (err) => console.error('Error al registrar carrito abandonado:', err)
+        });
+      }
+    });
+  }
+
+  /**
+   * Tracking de abandono para analytics
+   */
+  private trackAbandonment(): void {
+    // Aquí se integraría con Google Analytics, Facebook Pixel, etc.
+    const abandonmentData = {
+      event: 'checkout_abandonment',
+      step: this.currentStep,
+      cartValue: this.orderSummary.total,
+      timestamp: new Date().toISOString()
+    };
+    
+    console.log('Checkout abandonment tracked:', abandonmentData);
+    
+    // Ejemplo de integración con window.dataLayer (Google Analytics)
+    if (typeof window !== 'undefined' && (window as any).dataLayer) {
+      (window as any).dataLayer.push(abandonmentData);
+    }
+  }
+
+  /**
+   * Maneja cuando el usuario decide quedarse en el checkout
+   */
+  onStayInCheckout(): void {
+    this.hasFormChanges = false;
   }
 
 
@@ -397,7 +495,24 @@ export class CheckoutComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   cancelCheckout() {
+    // Mostrar modal de confirmación antes de cancelar
+    this.abandonmentModal.open();
+  }
+
+  /**
+   * Confirma la salida del checkout (desde el modal)
+   */
+  confirmExit(): void {
+    this.isNavigatingAway = true;
+    this.onAbandonmentConfirmed();
     this.router.navigate(['/cart']);
+  }
+
+  /**
+   * Maneja cuando el usuario decide quedarse en el checkout
+   */
+  onStayInCheckoutHandler(): void {
+    this.hasFormChanges = false;
   }
 
   // Validadores de formulario
@@ -426,5 +541,27 @@ export class CheckoutComponent implements OnInit, OnDestroy, AfterViewInit {
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  /**
+   * Previene salida accidental del navegador
+   */
+  @HostListener('window:beforeunload', ['$event'])
+  onBeforeUnload(event: BeforeUnloadEvent): void {
+    if (this.hasFormChanges && this.currentStep < 3) {
+      event.preventDefault();
+      event.returnValue = '';
+    }
+  }
+
+  /**
+   * Maneja cambios de hash en la URL
+   */
+  @HostListener('window:hashchange', ['$event'])
+  onHashChange(event: HashChangeEvent): void {
+    if (this.hasFormChanges && !this.isNavigatingAway) {
+      event.preventDefault();
+      this.abandonmentModal.open();
+    }
   }
 }

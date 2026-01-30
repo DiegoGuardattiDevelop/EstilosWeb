@@ -411,3 +411,9 @@
     </aside>
   </div>
 </div>
+
+<!-- Modal de protección contra abandono de carrito -->
+<app-cart-abandonment-modal
+  (confirmedLeave)="confirmExit()"
+  (confirmedStay)="onStayInCheckoutHandler()"
+></app-cart-abandonment-modal>

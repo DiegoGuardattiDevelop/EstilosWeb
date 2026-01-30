@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\FooterController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ShippingController;
+use App\Http\Controllers\Api\CartAbandonmentController;
 
 Route::apiResource('categories', CategoryController::class);
 Route::apiResource('products', ProductController::class);
@@ -19,6 +20,11 @@ Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 
 Route::get('/footer-data', [FooterController::class, 'getFooterData']);
+
+// Carrito abandonado (sin autenticación requerida)
+Route::post('/cart-abandonment', [CartAbandonmentController::class, 'store']);
+Route::get('/cart-abandonment', [CartAbandonmentController::class, 'getAbandonedCarts']);
+Route::post('/cart-abandonment/notify', [CartAbandonmentController::class, 'markAsNotified']);
 
 Route::middleware('auth:sanctum')->group(function () {
 
