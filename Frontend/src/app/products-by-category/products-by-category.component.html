@@ -165,13 +165,22 @@
   @if (products.length > 0) {
   <div class="products-grid">
     @for (product of products; track product.id) {
-    <div class="product-card">
+    <div class="product-card" (click)="viewProductDetail(product, $event)" style="cursor: pointer;">
       <div class="product-image-wrapper">
         <img
           [src]="getProductImageUrl(product.image_url)"
           [alt]="product.name"
           class="product-image"
         />
+        <!-- Botón de agregar al carrito -->
+        <button 
+          class="add-to-cart-btn"
+          (click)="addToCart(product, $event)"
+          title="Agregar al carrito"
+        >
+          <i class="fas fa-shopping-cart"></i>
+          Agregar
+        </button>
       </div>
       <div class="product-content">
         <h3>{{ product.name }}</h3>
