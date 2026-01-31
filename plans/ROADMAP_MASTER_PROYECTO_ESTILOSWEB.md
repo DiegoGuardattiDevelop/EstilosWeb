@@ -2,9 +2,9 @@
 
 ## Documento Maestro Consolidado de Desarrollo
 
-**Fecha:** 30 de enero de 2026
-**Versión:** 2.2 - Post-Checkout Complete
-**Estado del Proyecto:** 88% Completo - Checkout Flow Completo, Iniciando Optimización
+**Fecha:** 31 de enero de 2026
+**Versión:** 2.4 - Lightbox Completado
+**Estado del Proyecto:** 95% Completo - Solo pendiente Indicador de Progreso Visual
 
 ---
 
@@ -142,36 +142,39 @@
 - **Esfuerzo:** 3 horas
 - **Prioridad:** MEDIA
 
-#### 8. **Stock por Variante** 🟡
+#### 8. **Stock por Variante** ✅
 
-- **Estado:** ❌ Pendiente
+- **Estado:** ✅ Completado - Ya implementado en el modelo
 - **Impacto:** Bajo - UX mejorada
 - **Requerimientos:**
-  - Stock dinámico por talla/color
-  - Prevención de "agotado" post-selección
+  - [x] Stock dinámico por talla/color
+  - [x] Prevención de "agotado" post-selección
 - **Archivo:** `ESTRATEGIAS_UX_ROPA_METRICAS_CONVERSION.md` (línea 349)
-- **Esfuerzo:** 4 horas
+- **Esfuerzo:** 4 horas - YA EXISTE
 - **Prioridad:** BAJA
 
-#### 8. **Opciones de Gift Wrapping** 🟡
+#### 9. **Lightbox Modal Completo** ✅
 
-- **Estado:** ❌ Pendiente
+- **Estado:** ✅ Completado - 31 ENE 2026
+- **Impacto:** Muy bajo - UX mejorada
+- **Requerimientos:**
+  - [x] Implementación completa en product-detail
+  - [x] Navegación de galería con flechas
+  - [x] Zoom al pasar el mouse
+  - [x] Indicador de posición (1/N)
+  - [x] Thumbnails de navegación
+- **Esfuerzo:** 3 horas - COMPLETADO
+- **Prioridad:** BAJA
+
+#### 10. **Opciones de Gift Wrapping** 🟡
+
+- **Estado:** ❌ Eliminado del roadmap - No priorizado
 - **Impacto:** Muy bajo (+$2-3 por transacción)
 - **Requerimientos:**
   - Opción en checkout
   - +$1-2 USD por pedido
 - **Esfuerzo:** 2 horas
-- **Prioridad:** BAJA
-
-#### 9. **Lightbox Modal Completo** 🟡
-
-- **Estado:** ❌ Pendiente
-- **Impacto:** Muy bajo - UX mejorada
-- **Requerimientos:**
-  - Implementación faltante en product-detail
-  - Navegación completa de galería
-- **Esfuerzo:** 3 horas
-- **Prioridad:** BAJA
+- **Prioridad:** BAJA - Descartado por ahora
 
 ---
 
@@ -214,16 +217,17 @@
 
 ## 📊 **MÉTRICAS DE CONVERSIÓN ESPERADAS**
 
-| Mejora Implementada     | Estado       | Impacto Esperado | ROI Mensual    |
-| ----------------------- | ------------ | ---------------- | -------------- |
-| **Stripe Integration**  | ✅ Completo  | +100% (de $0)    | $4,050         |
-| **Checkout Multi-paso** | ✅ Completo  | +15-20%          | Incluido       |
-| **Envío Dinámico**      | ✅ Completo  | +8%              | +$1,000        |
-| **Página Confirmación** | ✅ 90%       | +5%              | +$600          |
-| **Tracking de Órdenes** | ✅ 80%       | +3%              | +$400          |
-| **Indicador Progreso**  | ❌ Pendiente | +2%              | +$250          |
-| **Stock por Variante**  | ❌ Pendiente | +1-2%            | +$200          |
-| **TOTAL PROYECTADO**    |              |                  | **$6,500/mes** |
+| Mejora Implementada     | Estado        | Impacto Esperado | ROI Mensual    |
+| ----------------------- | ------------- | ---------------- | -------------- |
+| **Stripe Integration**  | ✅ Completo   | +100% (de $0)    | $4,050         |
+| **Checkout Multi-paso** | ✅ Completo   | +15-20%          | Incluido       |
+| **Envío Dinámico**      | ✅ Completo   | +8%              | +$1,000        |
+| **Página Confirmación** | ✅ 90%        | +5%              | +$600          |
+| **Tracking de Órdenes** | ✅ 80%        | +3%              | +$400          |
+| **Indicador Progreso**  | ❌ Pendiente  | +2%              | +$250          |
+| **Stock por Variante**  | ✅ Completado | +1-2%            | +$200          |
+| **Lightbox Modal**      | ✅ Completado | +0.5%            | +$100          |
+| **TOTAL PROYECTADO**    |               |                  | **$6,500/mes** |
 
 ---
 
@@ -335,14 +339,14 @@
 ## 📞 **SOPORTE Y CONTACTO**
 
 - **Repositorio:** https://github.com/DiegoGuardattiDevelop/EstilosWeb
-- **Branch actual:** feature/proteccion-abandono-carrito
-- **Último commit:** Checkout flow completado, iniciando protección contra abandono de carrito
-- **Estado:** Listo para testing del flujo checkout
+- **Branch actual:** feature/lightbox-modal-completo
+- **Último commit:** Lightbox modal completo con zoom y navegación implementado
+- **Estado:** 95% completo - Solo pendiente Indicador de Progreso Visual
 
 ---
 
-**Documento generado:** 13 de enero de 2026
-**Próxima revisión:** 20 de enero de 2026
+**Documento generado:** 31 de enero de 2026
+**Próxima revisión:** 7 de febrero de 2026
 **Responsable:** Diego Guardatti
 
 ---
