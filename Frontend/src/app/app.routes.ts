@@ -1,17 +1,8 @@
 import { Routes } from '@angular/router';
 import { AuthGuard } from './auth.guard';
-// import { WelcomeComponent } from './components/welcome/welcome.component';
 import { HomeComponent } from './home/home.component';
-import { LoginComponent } from './components/login/login.component';
-import { RegisterComponent } from './components/register/register.component';
-import { ProfileComponent } from './components/profile/profile.component';
 import { ProductsByCategoryComponent } from './products-by-category/products-by-category.component';
-import { ProductDetailComponent } from './components/product-detail/product-detail.component';
-import { CartComponent } from './cart/cart.component';
-import { CheckoutComponent } from './components/checkout/checkout.component';
-import { OrderConfirmationComponent } from './components/order-confirmation/order-confirmation.component';
-import { OrderTrackingComponent } from './components/order-tracking/order-tracking.component';
-import { FormsModule } from '@angular/forms';
+
 export const routes: Routes = [
   // Ruta de bienvenida, que será la primera que se vea.
   { path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -21,18 +12,57 @@ export const routes: Routes = [
   
   // Ruta para ver los productos de una categoría específica.
   { path: 'products-by-category/:slug', component: ProductsByCategoryComponent },
-  { path: 'product/:slug', component: ProductDetailComponent },
-  { path: 'cart/:slug', component: CartComponent }, // Ruta del carrito con slug opcional
-  { path: 'cart', component: CartComponent },
-  { path: 'checkout', component: CheckoutComponent, canActivate: [AuthGuard] },
-  { path: 'order-confirmation/:orderId', component: OrderConfirmationComponent },
-  { path: 'order-tracking/:orderId', component: OrderTrackingComponent, canActivate: [AuthGuard] },
-  // Rutas de autenticación.
-  { path: 'login', component: LoginComponent },
-  { path: 'register', component: RegisterComponent },
   
-  // Ruta de perfil protegida por el guardia de autenticación.
-  { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },
+  // Lazy Loading: ProductDetail (usado frecuentemente pero no en home)
+  {
+    path: 'product/:slug',
+    loadComponent: () => import('./components/product-detail/product-detail.component').then(m => m.ProductDetailComponent)
+  },
+  
+  // Lazy Loading: CartComponent
+  {
+    path: 'cart/:slug',
+    loadComponent: () => import('./cart/cart.component').then(m => m.CartComponent)
+  },
+  {
+    path: 'cart',
+    loadComponent: () => import('./cart/cart.component').then(m => m.CartComponent)
+  },
+  
+  // Lazy Loading: Checkout (protegido, usado solo alfinalizar compra)
+  {
+    path: 'checkout',
+    loadComponent: () => import('./components/checkout/checkout.component').then(m => m.CheckoutComponent),
+    canActivate: [AuthGuard]
+  },
+  
+  // Lazy Loading: OrderConfirmation (usado solo después de comprar)
+  {
+    path: 'order-confirmation/:orderId',
+    loadComponent: () => import('./components/order-confirmation/order-confirmation.component').then(m => m.OrderConfirmationComponent)
+  },
+  
+  // Lazy Loading: OrderTracking (protegido)
+  {
+    path: 'order-tracking/:orderId',
+    loadComponent: () => import('./components/order-tracking/order-tracking.component').then(m => m.OrderTrackingComponent),
+    canActivate: [AuthGuard]
+  },
+  
+  // Lazy Loading: Auth (login/register/profile)
+  {
+    path: 'login',
+    loadComponent: () => import('./components/login/login.component').then(m => m.LoginComponent)
+  },
+  {
+    path: 'register',
+    loadComponent: () => import('./components/register/register.component').then(m => m.RegisterComponent)
+  },
+  {
+    path: 'profile',
+    loadComponent: () => import('./components/profile/profile.component').then(m => m.ProfileComponent),
+    canActivate: [AuthGuard]
+  },
   
   // Si no se encuentra ninguna ruta, redirige a la ruta de bienvenida.
   { path: '**', redirectTo: '' }
