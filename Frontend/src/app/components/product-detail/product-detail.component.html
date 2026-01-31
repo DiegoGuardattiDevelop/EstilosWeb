@@ -186,11 +186,51 @@
 </div>
 
 <!-- Lightbox modal -->
-<div *ngIf="lightboxOpen" class="lightbox" (click)="closeLightbox()" (keydown)="handleKeydown($event)" tabindex="-1">
+<div *ngIf="lightboxOpen" class="lightbox" (click)="closeLightbox()" (keydown)="handleKeydown($event)" tabindex="-1" #lightboxContainer>
     <div class="lightbox-content" (click)="$event.stopPropagation()">
-        <button class="lightbox-close" (click)="closeLightbox()" aria-label="Cerrar galería">✕</button>
-        <button class="lightbox-prev" (click)="prevLightbox()" aria-label="Imagen anterior">◀</button>
-        <img [src]="getProductImageUrl(imagesList[lightboxIndex])" [alt]="product?.name || 'Imagen'" />
-        <button class="lightbox-next" (click)="nextLightbox()" aria-label="Imagen siguiente">▶</button>
+        <!-- Indicador de posición -->
+        <div class="lightbox-counter">{{ lightboxIndex + 1 }} / {{ imagesList.length }}</div>
+        
+        <!-- Botón cerrar -->
+        <button class="lightbox-close" (click)="closeLightbox()" aria-label="Cerrar galería">
+            <i class="fas fa-times"></i>
+        </button>
+        
+        <!-- Botón anterior -->
+        <button class="lightbox-prev" (click)="prevLightbox()" aria-label="Imagen anterior" [disabled]="imagesList.length <= 1">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        
+        <!-- Contenedor de imagen con zoom -->
+        <div class="lightbox-image-container" 
+             (mousemove)="onImageMouseMove($event)" 
+             (mouseleave)="onImageMouseLeave()"
+             [class.zoomed]="isZoomed">
+            <img [src]="getProductImageUrl(imagesList[lightboxIndex])" 
+                 [alt]="product?.name || 'Imagen'"
+                 [style.transform]="isZoomed ? 'scale(' + zoomScale + ') translate(' + zoomPosition.x + 'px, ' + zoomPosition.y + 'px)' : 'scale(1)'"
+                 [style.transform-origin]="zoomOrigin"
+                 class="lightbox-image" />
+            <div class="zoom-hint" *ngIf="!isZoomed">
+                <i class="fas fa-search-plus"></i>
+                <span>Pasa el mouse para hacer zoom</span>
+            </div>
+        </div>
+        
+        <!-- Botón siguiente -->
+        <button class="lightbox-next" (click)="nextLightbox()" aria-label="Imagen siguiente" [disabled]="imagesList.length <= 1">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+        
+        <!-- Thumbnails en el lightbox -->
+        <div class="lightbox-thumbnails" *ngIf="imagesList.length > 1">
+            <button *ngFor="let img of imagesList; let i = index" 
+                    class="lightbox-thumbnail"
+                    [class.active]="i === lightboxIndex"
+                    (click)="goToImage(i)"
+                    [attr.aria-label]="'Ver imagen ' + (i + 1)">
+                <img [src]="getProductImageUrl(img)" [alt]="'Thumbnail ' + (i + 1)" />
+            </button>
+        </div>
     </div>
 </div>

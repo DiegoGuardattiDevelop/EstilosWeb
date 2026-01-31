@@ -44,6 +44,12 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   imagesList: string[] = [];
   lightboxOpen: boolean = false;
   lightboxIndex: number = 0;
+  
+  // Zoom state
+  isZoomed: boolean = false;
+  zoomScale: number = 2;
+  zoomPosition = { x: 0, y: 0 };
+  zoomOrigin: string = 'center center';
 
   private destroy$ = new Subject<void>();
 
@@ -156,10 +162,15 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     this.imagesList = (this.product.images && this.product.images.length) ? [...this.product.images] : [this.product.image_url];
     this.lightboxIndex = Math.max(0, Math.min(index, this.imagesList.length - 1));
     this.lightboxOpen = true;
+    // Prevent body scroll when lightbox is open
+    document.body.style.overflow = 'hidden';
   }
 
   closeLightbox(): void {
     this.lightboxOpen = false;
+    this.isZoomed = false;
+    // Restore body scroll
+    document.body.style.overflow = '';
   }
 
   nextLightbox(): void {
@@ -179,6 +190,40 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     if (event.key === 'Escape') this.closeLightbox();
     if (event.key === 'ArrowRight') this.nextLightbox();
     if (event.key === 'ArrowLeft') this.prevLightbox();
+  }
+
+  // Navigate to specific image
+  goToImage(index: number): void {
+    if (index >= 0 && index < this.imagesList.length) {
+      this.lightboxIndex = index;
+    }
+  }
+
+  // Zoom functionality
+  onImageMouseMove(event: MouseEvent): void {
+    const target = event.currentTarget as HTMLElement;
+    const rect = target.getBoundingClientRect();
+    
+    // Calculate mouse position as percentage
+    const x = ((event.clientX - rect.left) / rect.width) * 100;
+    const y = ((event.clientY - rect.top) / rect.height) * 100;
+    
+    this.zoomOrigin = `${x}% ${y}%`;
+    this.isZoomed = true;
+    
+    // Calculate transform position for pan effect
+    const centerX = 50;
+    const centerY = 50;
+    const offsetX = (x - centerX) * 0.5;
+    const offsetY = (y - centerY) * 0.5;
+    
+    this.zoomPosition = { x: -offsetX, y: -offsetY };
+  }
+
+  onImageMouseLeave(): void {
+    this.isZoomed = false;
+    this.zoomPosition = { x: 0, y: 0 };
+    this.zoomOrigin = 'center center';
   }
 
   getButtonText(): string {
@@ -230,5 +275,7 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    // Ensure body scroll is restored if component is destroyed while lightbox is open
+    document.body.style.overflow = '';
   }
 }
