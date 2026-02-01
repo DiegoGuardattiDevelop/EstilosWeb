@@ -216,10 +216,8 @@ export class CheckoutComponent implements OnInit, OnDestroy, AfterViewInit {
 
 
   ngAfterViewInit() {
-    // Asegurar que el DOM esté listo antes de montar Stripe
-    setTimeout(() => {
-      this.initializeStripe();
-    }, 100);
+    // Stripe se inicializa dinámicamente cuando se llega al paso 3
+    // Ver nextStep() método
   }
 
   private initializeForms() {
@@ -238,11 +236,11 @@ export class CheckoutComponent implements OnInit, OnDestroy, AfterViewInit {
     });
 
     // Formulario de pago (Paso 3)
+    // Usamos Stripe Elements para capturar los datos sensibles de la tarjeta,
+    // por lo que el formulario solo necesita el nombre en la tarjeta y la opción
+    // de usar la dirección de facturación.
     this.paymentForm = this.fb.group({
       cardName: ['', [Validators.required, Validators.minLength(5)]],
-      cardNumber: ['', [Validators.required, Validators.pattern(/^[0-9]{16}$/)]],
-      expiryDate: ['', [Validators.required, Validators.pattern(/^(0[1-9]|1[0-2])\/\d{2}$/)]],
-      cvv: ['', [Validators.required, Validators.pattern(/^[0-9]{3,4}$/)]],
       billingAddress: [true]
     });
 
@@ -382,6 +380,10 @@ export class CheckoutComponent implements OnInit, OnDestroy, AfterViewInit {
     } else if (this.currentStep === 2) {
       this.currentStep = 3;
       window.scrollTo(0, 0);
+      // Inicializar Stripe cuando se llega al paso 3 (pago)
+      setTimeout(() => {
+        this.initializeStripe();
+      }, 100);
     } else if (this.currentStep === 3) {
       this.submitOrder();
     }
@@ -407,8 +409,11 @@ export class CheckoutComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   async submitOrder() {
+    // Indicar que se intentó el pago para mostrar errores de validación
+    this.paymentAttempted = true;
+
     if (!this.stripe || !this.cardElement) {
-      this.errorMessage = 'Error de configuración de pago';
+      this.errorMessage = 'Error de configuración de pago. Intenta recargar la página o contacta soporte.';
       return;
     }
 
@@ -440,7 +445,17 @@ export class CheckoutComponent implements OnInit, OnDestroy, AfterViewInit {
       });
 
       if (error) {
-        this.errorMessage = error.message || 'Error en el pago';
+        // Mensajes más descriptivos según tipo de error de Stripe
+        const stripeMsg = error.message || 'Error en el pago';
+        if (error.code === 'card_declined') {
+          this.errorMessage = 'Pago rechazado: la tarjeta fue declinada. Intenta con otra tarjeta.';
+        } else if (error.code === 'expired_card') {
+          this.errorMessage = 'Pago rechazado: la tarjeta ha expirado. Usa otra tarjeta.';
+        } else if (error.code === 'incorrect_cvc') {
+          this.errorMessage = 'Pago rechazado: CVC incorrecto. Verifica los datos e intenta nuevamente.';
+        } else {
+          this.errorMessage = stripeMsg;
+        }
         this.isLoading = false;
         return;
       }
