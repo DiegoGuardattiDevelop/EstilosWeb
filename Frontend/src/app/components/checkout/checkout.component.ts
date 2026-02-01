@@ -7,8 +7,9 @@ import { HttpClient } from '@angular/common/http';
 import { CartService } from '../../services/cart.service';
 import { AuthService } from '../../services/auth.service';
 import { PaymentService } from '../../services/payment.service';
+import { MercadoPagoService } from '../../services/mercadopago.service';
 import { CartItem } from '../../models/cart-item.model';
-import { loadStripe, Stripe, StripeElements, StripeCardElement } from '@stripe/stripe-js';
+
 import { CartAbandonmentModalComponent } from '../cart-abandonment-modal/cart-abandonment-modal.component';
 
 interface ShippingMethod {
@@ -50,6 +51,7 @@ export class CheckoutComponent implements OnInit, OnDestroy, AfterViewInit {
   isLoading = false;
   errorMessage = '';
   paymentAttempted = false;
+  // Pago: solo Mercado Pago (Stripe removido)
 
   // Formularios
   shippingForm!: FormGroup;
@@ -89,14 +91,11 @@ export class CheckoutComponent implements OnInit, OnDestroy, AfterViewInit {
     total: 0
   };
 
-  // Stripe properties
-  stripe: Stripe | null = null;
-  elements: StripeElements | null = null;
-  cardElement: StripeCardElement | null = null;
-  clientSecret: string = '';
+  // Mercado Pago properties
+  mp: any = null;
+  mpCheckoutInstance: any = null;
 
-  // Referencia al elemento DOM de Stripe
-  @ViewChild('cardElement') cardElementRef!: ElementRef;
+  // No se usa Stripe ya que Mercado Pago será la única pasarela
   
   // Modal de abandono de carrito
   @ViewChild(CartAbandonmentModalComponent) abandonmentModal!: CartAbandonmentModalComponent;
@@ -110,7 +109,7 @@ export class CheckoutComponent implements OnInit, OnDestroy, AfterViewInit {
   constructor(
     private cartService: CartService,
     private authService: AuthService,
-    private paymentService: PaymentService,
+    private mercadopagoService: MercadoPagoService,
     private router: Router,
     private fb: FormBuilder,
     private http: HttpClient
@@ -216,8 +215,20 @@ export class CheckoutComponent implements OnInit, OnDestroy, AfterViewInit {
 
 
   ngAfterViewInit() {
-    // Stripe se inicializa dinámicamente cuando se llega al paso 3
+    // Stripe y Mercado Pago se inicializan dinámicamente cuando se llega al paso 3
     // Ver nextStep() método
+  }
+
+  private async initializeMercadoPago() {
+    this.mp = this.mercadopagoService.getMercadoPago();
+    if (!this.mp) {
+      // MP no está cargado aún, esperar a que se cargue
+      this.mercadopagoService.isMercadoPagoLoaded().pipe(takeUntil(this.destroy$)).subscribe((loaded) => {
+        if (loaded) {
+          this.mp = this.mercadopagoService.getMercadoPago();
+        }
+      });
+    }
   }
 
   private initializeForms() {
@@ -236,9 +247,7 @@ export class CheckoutComponent implements OnInit, OnDestroy, AfterViewInit {
     });
 
     // Formulario de pago (Paso 3)
-    // Usamos Stripe Elements para capturar los datos sensibles de la tarjeta,
-    // por lo que el formulario solo necesita el nombre en la tarjeta y la opción
-    // de usar la dirección de facturación.
+    // Mercado Pago no requiere campos de tarjeta en el formulario (se redirige a Checkout)
     this.paymentForm = this.fb.group({
       cardName: ['', [Validators.required, Validators.minLength(5)]],
       billingAddress: [true]
@@ -262,17 +271,7 @@ export class CheckoutComponent implements OnInit, OnDestroy, AfterViewInit {
       });
   }
 
-  private async initializeStripe() {
-    this.stripe = await this.paymentService.getStripe();
-    if (this.stripe) {
-      this.elements = this.stripe.elements();
-      this.cardElement = this.elements.create('card');
-      // Montar el elemento en el contenedor correcto
-      if (this.cardElementRef && this.cardElementRef.nativeElement) {
-        this.cardElement.mount(this.cardElementRef.nativeElement);
-      }
-    }
-  }
+
 
   private calculateOrderSummary() {
     this.cartItems$
@@ -380,9 +379,9 @@ export class CheckoutComponent implements OnInit, OnDestroy, AfterViewInit {
     } else if (this.currentStep === 2) {
       this.currentStep = 3;
       window.scrollTo(0, 0);
-      // Inicializar Stripe cuando se llega al paso 3 (pago)
+      // Inicializar métodos de pago cuando se llega al paso 3
       setTimeout(() => {
-        this.initializeStripe();
+        this.initializeMercadoPago();
       }, 100);
     } else if (this.currentStep === 3) {
       this.submitOrder();
@@ -412,101 +411,88 @@ export class CheckoutComponent implements OnInit, OnDestroy, AfterViewInit {
     // Indicar que se intentó el pago para mostrar errores de validación
     this.paymentAttempted = true;
 
-    if (!this.stripe || !this.cardElement) {
-      this.errorMessage = 'Error de configuración de pago. Intenta recargar la página o contacta soporte.';
-      return;
-    }
-
     this.isLoading = true;
     this.errorMessage = '';
 
     try {
-      // Crear PaymentIntent
-      const paymentIntentResponse = await this.paymentService.createPaymentIntent(this.orderSummary.total).toPromise();
-      this.clientSecret = paymentIntentResponse.clientSecret;
-
-      // Confirmar pago con Stripe
-      const { error, paymentIntent } = await this.stripe.confirmCardPayment(this.clientSecret, {
-        payment_method: {
-          card: this.cardElement,
-          billing_details: {
-            name: this.shippingForm.value.firstName + ' ' + this.shippingForm.value.lastName,
-            email: this.shippingForm.value.email,
-            phone: this.shippingForm.value.phone,
-            address: {
-              line1: this.shippingForm.value.address,
-              city: this.shippingForm.value.city,
-              state: this.shippingForm.value.state,
-              postal_code: this.shippingForm.value.zipCode,
-              country: 'MX' // Cambiar según el país
-            }
-          }
-        }
-      });
-
-      if (error) {
-        // Mensajes más descriptivos según tipo de error de Stripe
-        const stripeMsg = error.message || 'Error en el pago';
-        if (error.code === 'card_declined') {
-          this.errorMessage = 'Pago rechazado: la tarjeta fue declinada. Intenta con otra tarjeta.';
-        } else if (error.code === 'expired_card') {
-          this.errorMessage = 'Pago rechazado: la tarjeta ha expirado. Usa otra tarjeta.';
-        } else if (error.code === 'incorrect_cvc') {
-          this.errorMessage = 'Pago rechazado: CVC incorrecto. Verifica los datos e intenta nuevamente.';
-        } else {
-          this.errorMessage = stripeMsg;
-        }
-        this.isLoading = false;
-        return;
-      }
-
-      if (paymentIntent.status === 'succeeded') {
-        // Obtener items del carrito
-        const cartItems = await this.cartItems$.toPromise();
-        const orderItems = cartItems?.map(item => ({
-          product_id: item.product_id,
-          quantity: item.quantity,
-          price: item.price
-        })) || [];
-
-        // Enviar orden al backend
-        const orderData = {
-          shipping: this.shippingForm.value,
-          paymentIntentId: paymentIntent.id,
-          items: orderItems,
-          total: this.orderSummary.total
-        };
-
-        // Enviar al backend
-        let orderResponse: any = null;
-        try {
-          orderResponse = await this.http.post('/api/orders', orderData).toPromise();
-          console.log('Orden creada exitosamente:', orderResponse);
-        } catch (error) {
-          console.error('Error al crear la orden:', error);
-          this.errorMessage = 'Error al procesar tu orden';
-          this.isLoading = false;
-          return;
-        }
-
-        // Limpiar carrito
-        this.cartService.clearCart();
-
-        // Redirigir a confirmación con el ID real de la orden
-        if (orderResponse && orderResponse.order && orderResponse.order.id) {
-          this.router.navigate(['/order-confirmation', orderResponse.order.id]);
-        } else {
-          this.router.navigate(['/order-confirmation'], {
-            queryParams: { orderId: 'ORD-' + Date.now() }
-          });
-        }
-      }
+      await this.submitOrderWithMercadoPago();
     } catch (error) {
       this.errorMessage = 'Error procesando el pago';
       console.error('Payment error:', error);
     }
 
     this.isLoading = false;
+  }
+
+  // Flujo Stripe eliminado: ahora solo Mercado Pago se usa para procesar pagos.
+
+  private async submitOrderWithMercadoPago() {
+    if (!this.mp) {
+      this.errorMessage = 'Error: Mercado Pago no está disponible. Por favor intenta de nuevo.';
+      return;
+    }
+
+    try {
+      // Crear preferencia en Mercado Pago
+      const preferenceResponse = await this.mercadopagoService.createPreference({
+        amount: this.orderSummary.total,
+        currency: 'ARS', // Cambiar según tu moneda
+        description: 'Compra EstilosWeb',
+        orderId: 'ORD-' + Date.now(),
+        customerEmail: this.shippingForm.value.email,
+        items: await this.cartItems$.toPromise()
+      }).toPromise();
+
+      if (preferenceResponse && preferenceResponse.initPoint) {
+        // Redirigir al checkout de Mercado Pago
+        window.location.href = preferenceResponse.initPoint;
+      } else {
+        this.errorMessage = 'Error: No se pudo crear la preferencia de pago en Mercado Pago.';
+      }
+    } catch (error) {
+      this.errorMessage = 'Error procesando el pago con Mercado Pago';
+      console.error('Mercado Pago error:', error);
+    }
+  }
+
+  private async finalizeOrder(paymentId: string, paymentGateway: string) {
+    // Obtener items del carrito
+    const cartItems = await this.cartItems$.toPromise();
+    const orderItems = cartItems?.map(item => ({
+      product_id: item.product_id,
+      quantity: item.quantity,
+      price: item.price
+    })) || [];
+
+    // Enviar orden al backend
+    const orderData = {
+      shipping: this.shippingForm.value,
+      paymentIntentId: paymentId,
+      paymentGateway: paymentGateway,
+      items: orderItems,
+      total: this.orderSummary.total
+    };
+
+    try {
+      const orderResponse = await this.http.post<any>('/api/orders', orderData).toPromise();
+      console.log('Orden creada exitosamente:', orderResponse);
+
+      // Limpiar carrito
+      this.cartService.clearCart();
+
+      // Redirigir a confirmación
+      if (orderResponse && orderResponse.order && orderResponse.order.id) {
+        this.router.navigate(['/order-confirmation', orderResponse.order.id]);
+      } else {
+        this.router.navigate(['/order-confirmation'], {
+          queryParams: { orderId: 'ORD-' + Date.now() }
+        });
+      }
+    } catch (error) {
+      console.error('Error al crear la orden:', error);
+      this.errorMessage = 'Error al procesar tu orden';
+      this.isLoading = false;
+    }
   }
 
   cancelCheckout() {

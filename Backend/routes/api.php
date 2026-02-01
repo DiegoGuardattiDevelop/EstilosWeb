@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\FooterController;
 use App\Http\Controllers\Api\PaymentController;
+use App\Http\Controllers\Api\MercadoPagoController;
 use App\Http\Controllers\Api\ShippingController;
 use App\Http\Controllers\Api\CartAbandonmentController;
 
@@ -25,6 +26,9 @@ Route::get('/footer-data', [FooterController::class, 'getFooterData']);
 Route::post('/cart-abandonment', [CartAbandonmentController::class, 'store']);
 Route::get('/cart-abandonment', [CartAbandonmentController::class, 'getAbandonedCarts']);
 Route::post('/cart-abandonment/notify', [CartAbandonmentController::class, 'markAsNotified']);
+
+// Webhooks (sin autenticación)
+Route::post('/mercadopago/webhook', [MercadoPagoController::class, 'webhook']);
 
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -43,9 +47,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profile', [AuthController::class, 'profile']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
-    // Pagos
+    // Pagos Stripe
     Route::post('/create-payment-intent', [PaymentController::class, 'createPaymentIntent']);
     Route::post('/confirm-payment', [PaymentController::class, 'confirmPayment']);
+
+    // Pagos Mercado Pago
+    Route::post('/mercadopago/preference', [MercadoPagoController::class, 'createPreference']);
+    Route::post('/mercadopago/payment', [MercadoPagoController::class, 'confirmPayment']);
+    Route::get('/mercadopago/payment-status/{paymentId}', [MercadoPagoController::class, 'getPaymentStatus']);
 
     // Envío
     Route::get('/shipping-methods', [ShippingController::class, 'getShippingMethods']);

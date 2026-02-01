@@ -300,29 +300,38 @@
       <div class="step-content" *ngIf="currentStep === 3">
         <h2>Información de Pago</h2>
 
-        <!-- CORREGIR ESTO: Formulario con formGroup -->
         <form [formGroup]="paymentForm" (ngSubmit)="submitOrder()">
+          <!-- Método de pago: Mercado Pago -->
+          <div class="form-group">
+            <label>Método de Pago</label>
+            <p>Se utilizará Mercado Pago para procesar el pago. Serás redirigido al sitio seguro de Mercado Pago para completar la transacción.</p>
+          </div>
+
           <!-- Datos del usuario -->
           <div class="form-group">
-            <label for="cardName">Nombre en la tarjeta</label>
+            <label for="cardName">Nombre del Titular</label>
             <input
               type="text"
               id="cardName"
               formControlName="cardName"
               class="form-control"
               placeholder="Ej: Juan Pérez"
+              [class.is-invalid]="isFieldInvalid('cardName', paymentForm)"
             />
+            <span
+              class="error-text"
+              *ngIf="isFieldInvalid('cardName', paymentForm)"
+            >
+              {{ getFieldError('cardName', paymentForm) }}
+            </span>
           </div>
 
-          <!-- Elemento Stripe -->
           <div class="form-group">
-            <label for="card-element">Tarjeta de crédito</label>
-            <!-- AQUÍ está el problema: usa #cardElement en lugar de id="card-element" -->
-            <div #cardElement id="card-element-container"></div>
-            <small class="form-text text-muted">
-              Los datos de la tarjeta se procesan de forma segura con Stripe
-            </small>
-          </div>
+            <p class="mp-info">
+              Serás redirigido a Mercado Pago para completar el pago de forma segura.
+              Se aceptan múltiples métodos de pago incluyendo tarjetas y transferencias bancarias.
+            </p>
+          </div> 
 
           <!-- Botón de pago -->
           <button
@@ -330,9 +339,14 @@
             class="btn btn-primary btn-block"
             [disabled]="!paymentForm.valid || isLoading"
           >
-            {{ isLoading ? "Procesando..." : "Pagar $" + orderSummary.total }}
+            {{ isLoading ? "Procesando..." : ("Pagar $" + orderSummary.total | number:'1.2-2') }}
           </button>
         </form>
+
+        <!-- Mensajes de error -->
+        <div *ngIf="errorMessage" class="error-message">
+          {{ errorMessage }}
+        </div>
       </div>
 
       <!-- Botones de acción -->
