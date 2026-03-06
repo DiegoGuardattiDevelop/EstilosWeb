@@ -369,6 +369,11 @@ export class CartService implements OnDestroy {
   clearCart(): void {
     console.log('🧹 Vaciando carrito...');
 
+    // Limpieza inmediata del carrito local para reflejar el cambio en UI.
+    // Esto también permite mantener el carrito vacío aunque el llamado a la API falle.
+    this.updateCart([]);
+
+    // Si el usuario está autenticado, sincronizar la operación con el backend.
     if (this.authService.isLoggedIn()) {
       const options = this.getHttpOptions();
       this.http.delete(`${this.API_URL}/cart`, options)
@@ -380,10 +385,8 @@ export class CartService implements OnDestroy {
           takeUntil(this.destroy$)
         )
         .subscribe(() => {
-          this.updateCart([]);
+          // No es necesario volver a actualizar el carrito porque ya se limpió.
         });
-    } else {
-      this.updateCart([]);
     }
   }
 

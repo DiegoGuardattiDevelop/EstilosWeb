@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { CartService } from '../services/cart.service';
 import { CartItem } from '../models/cart-item.model';
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, firstValueFrom } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 import { takeUntil } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
@@ -28,6 +28,9 @@ export class CartComponent implements OnInit, OnDestroy {
   
   // Set para evitar bucles de carga de imágenes
   private failedImages = new Set<string>();
+
+  // WhatsApp phone number (from environment config)
+  whatsappNumber: string = environment.whatsappNumber || '5493512345678';
 
   constructor(
     public cartService: CartService,
@@ -111,9 +114,6 @@ export class CartComponent implements OnInit, OnDestroy {
 
   // ==================== MANEJO DE IMÁGENES ====================
 
-  /**
-   * Obtiene la URL correcta de la imagen del producto
-   */
   getProductImage(product: any): string {
     if (!product) {
       return this.PLACEHOLDER_IMAGE;
@@ -125,97 +125,158 @@ export class CartComponent implements OnInit, OnDestroy {
       return this.PLACEHOLDER_IMAGE;
     }
     
-    // Si ya es una URL completa
     if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
       return imageUrl;
     }
     
-    // Si es una data URI (base64 o SVG inline)
     if (imageUrl.startsWith('data:')) {
       return imageUrl;
     }
     
-    // Si empieza con 'storage/'
     if (imageUrl.startsWith('storage/')) {
       return `${environment.apiUrl.replace('/api', '')}/${imageUrl}`;
     }
     
-    // Por defecto, asumir que está en storage
     return `${environment.apiUrl.replace('/api', '')}/storage/${imageUrl}`;
   }
 
-  /**
-   * Maneja errores de carga de imágenes SIN CREAR BUCLES
-   * ⚠️ CRÍTICO: Previene bucles infinitos usando un Set de URLs fallidas
-   */
   handleImageError(event: any): void {
     const img = event.target as HTMLImageElement;
     const originalSrc = img.src;
 
-    // Si ya es el placeholder inline o ya intentamos cargar esta imagen, no hacer nada
     if (img.src === this.PLACEHOLDER_IMAGE || 
         this.failedImages.has(originalSrc)) {
-      console.warn('⚠️ Imagen ya procesada:', originalSrc);
+      console.warn('Imagen ya procesada:', originalSrc);
       return;
     }
 
-    // Marcar esta URL como fallida para no reintentarla
     this.failedImages.add(originalSrc);
+    console.warn('Error cargando imagen:', originalSrc);
     
-    console.warn('⚠️ Error cargando imagen:', originalSrc);
-    
-    // Si la imagen que falló NO es el placeholder de assets, intentar con él una vez
     if (!originalSrc.includes('placeholder.jpg')) {
       img.src = '/assets/images/placeholder.jpg';
     } else {
-      // Si el placeholder de assets también falla, usar el inline
       img.src = this.PLACEHOLDER_IMAGE;
     }
     
     img.alt = 'Imagen no disponible';
   }
 
-  /**
-   * Trackby function para optimizar el rendering de Angular
-   */
   trackByProductId(index: number, item: CartItem): number {
     return item.product.id;
   }
 
-  /**
-   * Calcula el subtotal de un item
-   */
   getItemSubtotal(item: CartItem): number {
     return item.product.price * item.quantity;
   }
 
-  /**
-   * Verifica si se alcanzó el límite de invitado
-   */
   isGuestLimitReached(): Observable<boolean> {
     return this.cartService.hasReachedGuestLimit();
   }
 
-  /**
-   * Obtiene el mensaje de límite de invitado
-   */
   getGuestLimitMessage(): string {
     return this.cartService.getGuestLimitMessage();
   }
 
-  /**
-   * Muestra un mensaje al usuario (puedes reemplazar con un servicio de toast/snackbar)
-   */
   private showMessage(message: string): void {
     alert(message);
-    // TODO: Reemplazar con un servicio de notificaciones más elegante
-    // Ejemplo: this.snackBar.open(message, 'Cerrar', { duration: 3000 });
+  }
+
+  isLoggedIn(): boolean {
+    return this.authService.isLoggedIn();
   }
 
   /**
-   * Verifica si el usuario está autenticado
+   * Genera un pedido detallado por WhatsApp
+   * Mensaje completo para el vendedor con todos los detalles
    */
-  isLoggedIn(): boolean {
-    return this.authService.isLoggedIn();
+  async orderByWhatsApp(): Promise<void> {
+    const items = await firstValueFrom(this.cartService.getCartItems());
+    const total = await firstValueFrom(this.cartService.getTotalPrice());
+
+    if (!items || items.length === 0) {
+      alert('Tu carrito está vacío');
+      return;
+    }
+
+    // Generar número de pedido único
+    const orderNumber = 'ORD-' + Date.now();
+    const fecha = new Date().toLocaleDateString('es-AR', { 
+      day: '2-digit', 
+      month: 'long', 
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+    
+    // Generar mensaje detallado de WhatsApp
+    let message = '╔══════════════════════════════╗\n';
+    message +=    '║   🛒 NUEVO PEDIDO - EstilosWeb   ║\n';
+    message +=    '╚══════════════════════════════╝\n\n';
+    
+    message += '📅 *Fecha:* ' + fecha + '\n';
+    message += '📋 *N° de Pedido:* ' + orderNumber + '\n\n';
+    message += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n';
+    message += '*📦 DETALLE DEL PEDIDO:*\n';
+    message += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n';
+    
+    let itemCount = 0;
+    items.forEach((item) => {
+      itemCount++;
+      const price = Number(item.product?.price) || 0;
+      const quantity = item.quantity || 0;
+      const subtotal = price * quantity;
+
+      message += '▸ *Producto #' + itemCount + '*\n';
+      message += '   Nombre: ' + (item.product?.name ?? 'Producto sin nombre') + '\n';
+      message += '   Cantidad: ' + quantity + '\n';
+      message += '   Precio unitario: $' + price.toFixed(2) + '\n';
+      message += '   --------------------' + '\n';
+      message += '   *Subtotal: $' + subtotal.toFixed(2) + '*\n\n';
+    });
+
+    message += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+    message += '*💰 RESUMEN:*\n';
+    message += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+    message += '   Subtotal:     $' + (total || 0).toFixed(2) + '\n';
+    message += '   Envio:        $0.00\n';
+    message += '   --------------------------------\n';
+    message += '   *TOTAL:       $' + (total || 0).toFixed(2) + '*\n\n';
+    
+    message += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n';
+    message += '*📱 DATOS DEL CLIENTE:*\n';
+    message += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+    
+    // Obtener datos del usuario si está logeado
+    const currentUser = this.authService.getCurrentUser();
+    const userName = currentUser?.name || 'Usuario Invitado';
+    const userEmail = currentUser?.email || '';
+    
+    message += '   Nombre: ' + userName + '\n';
+    if (userEmail) {
+      message += '   Email: ' + userEmail + '\n';
+    }
+    message += '   Teléfono: [COMPLETAR]\n';
+    message += '   Dirección: [COMPLETAR]\n\n';
+    
+    message += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n';
+    message += '*📌 INSTRUCCIONES:*\n';
+    message += '1. Confirme disponibilidad de productos\n';
+    message += '2. Indique método de pago (Efectivo/Transferencia/MercadoPago)\n';
+    message += '3. Coordine horario de retiro o entrega\n\n';
+    
+    message += '💚 *Gracias por su compra!.*\n';
+    message += '*Equipo EstilosWeb*';
+
+    // Codificar mensaje para URL
+    const encodedMessage = encodeURIComponent(message);
+    
+    // Limpiar el carrito después de generar el mensaje
+    this.cartService.clearCart();
+    this.failedImages.clear();
+
+    // Abrir WhatsApp
+    const whatsappUrl = 'https://wa.me/' + environment.whatsappNumber + '?text=' + encodedMessage;
+    window.open(whatsappUrl, '_blank');
   }
 }
