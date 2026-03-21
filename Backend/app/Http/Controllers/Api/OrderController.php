@@ -63,10 +63,15 @@ class OrderController extends Controller
             // Guardar los items de la orden
             $orderItems = [];
             foreach ($validated['items'] as $item) {
+                // Obtener el SKU del producto desde la base de datos
+                $product = \App\Models\Product::find($item['product_id']);
+                $sku = $product ? $product->sku : null;
+
                 $orderItems[] = [
                     'order_id' => $order->id,
                     'product_id' => $item['product_id'],
                     'product_name' => $item['product_name'],
+                    'sku' => $sku,
                     'quantity' => $item['quantity'],
                     'price' => $item['price'],
                     'total' => $item['price'] * $item['quantity'],
@@ -141,6 +146,7 @@ class OrderController extends Controller
                         return [
                             'id' => $item->id,
                             'product_name' => $item->product_name,
+                            'sku' => $item->sku,
                             'quantity' => (int) $item->quantity,
                             'price' => (float) $item->price,
                             'total' => (float) $item->total

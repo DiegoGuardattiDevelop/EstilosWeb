@@ -228,6 +228,7 @@ export class CartComponent implements OnInit, OnDestroy {
       const subtotal = price * quantity;
 
       message += '▸ *Producto #' + itemCount + '*\n';
+      message += '   SKU: ' + (item.product?.sku ?? 'N/A') + '\n';
       message += '   Nombre: ' + (item.product?.name ?? 'Producto sin nombre') + '\n';
       message += '   Cantidad: ' + quantity + '\n';
       message += '   Precio unitario: $' + price.toFixed(2) + '\n';

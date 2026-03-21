@@ -11,13 +11,14 @@
     <div class="confirmation-details">
       <div class="detail-card">
         <h3>Resumen de tu pedido</h3>
-        <div class="items-list">
-          <div class="item" *ngFor="let item of orderDetails.items">
-            <span class="item-name">{{ item.product_name }}</span>
-            <span class="item-quantity">x{{ item.quantity }}</span>
-            <span class="item-price">${{ item.price | number:'1.2-2' }}</span>
-          </div>
-        </div>
+         <div class="items-list">
+           <div class="item" *ngFor="let item of orderDetails.items">
+             <span class="item-sku">{{ item.sku ? '[' + item.sku + ']' : '' }}</span>
+             <span class="item-name">{{ item.product_name }}</span>
+             <span class="item-quantity">x{{ item.quantity }}</span>
+             <span class="item-price">${{ item.price | number:'1.2-2' }}</span>
+           </div>
+         </div>
         
         <div class="totals">
           <div class="total-row">

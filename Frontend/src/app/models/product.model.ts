@@ -12,6 +12,10 @@ image_url: string;
   slug?: string;
   featured?: boolean;
   active?: boolean;
+  sku?: string;
+  brand?: string;
+  size?: string;
+  color?: string;
   created_at?: string;
   updated_at?: string;
 }
