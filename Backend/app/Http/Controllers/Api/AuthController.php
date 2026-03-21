@@ -21,6 +21,10 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6|confirmed',
+            'phone' => 'nullable|string|max:20',
+            'address' => 'nullable|string|max:255',
+            'city' => 'nullable|string|max:100',
+            'province' => 'nullable|string|max:100',
         ]);
 
         if ($validator->fails()) {
@@ -35,6 +39,10 @@ class AuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'phone' => $request->phone,
+            'address' => $request->address,
+            'city' => $request->city,
+            'province' => $request->province,
         ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
@@ -47,6 +55,10 @@ class AuthController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
+                'phone' => $user->phone,
+                'address' => $user->address,
+                'city' => $user->city,
+                'province' => $user->province,
                 'created_at' => $user->created_at
             ],
             'message' => 'Usuario registrado exitosamente'
@@ -100,6 +112,10 @@ class AuthController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
+                'phone' => $user->phone,
+                'address' => $user->address,
+                'city' => $user->city,
+                'province' => $user->province,
                 'created_at' => $user->created_at
             ]
         ], 200);
@@ -145,6 +161,10 @@ class AuthController extends Controller
                     'name' => $user->name,
                     'email' => $user->email,
                     'email_verified_at' => $user->email_verified_at,
+                    'phone' => $user->phone,
+                    'address' => $user->address,
+                    'city' => $user->city,
+                    'province' => $user->province,
                     'created_at' => $user->created_at,
                     'updated_at' => $user->updated_at,
                     'orders_count' => $ordersCount, // ← Número REAL de pedidos
@@ -157,5 +177,50 @@ class AuthController extends Controller
                 'message' => 'Error al obtener el perfil'
             ], 500);
         }
+    }
+
+    /**
+     * Actualizar perfil del usuario
+     */
+    public function updateProfile(Request $request)
+    {
+        $user = $request->user();
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'sometimes|string|max:255',
+            'phone' => 'nullable|string|max:20',
+            'address' => 'nullable|string|max:255',
+            'city' => 'nullable|string|max:100',
+            'province' => 'nullable|string|max:100',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error de validación',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $user->update($request->only(['name', 'phone', 'address', 'city', 'province']));
+
+        // Recargar el usuario para obtener los valores actualizados
+        $user = $user->fresh();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Perfil actualizado correctamente',
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'phone' => $user->phone,
+                'address' => $user->address,
+                'city' => $user->city,
+                'province' => $user->province,
+                'created_at' => $user->created_at,
+                'updated_at' => $user->updated_at,
+            ]
+        ]);
     }
 }

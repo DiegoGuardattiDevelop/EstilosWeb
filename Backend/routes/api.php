@@ -45,6 +45,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('orders/{id}', [OrderController::class, 'show']);
     Route::get('orders/history', [OrderController::class, 'history']);
     Route::get('/profile', [AuthController::class, 'profile']);
+    Route::put('/profile', [AuthController::class, 'updateProfile']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
     // Pagos Stripe

@@ -157,6 +157,34 @@ export class AuthService {
   }
 
   /**
+   * Actualiza el perfil del usuario
+   */
+  public updateProfile(userData: Partial<User>): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/profile`, userData, {
+      headers: this.getAuthHeaders()
+    }).pipe(
+      tap((response) => {
+        if (response.success && response.user) {
+          this.currentUserSubject.next(response.user);
+          if (isPlatformBrowser(this.platformId)) {
+            localStorage.setItem('current_user', JSON.stringify(response.user));
+          }
+        }
+      }),
+      catchError(this.handleUpdateError)
+    );
+  }
+
+  private handleUpdateError(error: any): Observable<never> {
+    console.error('Error updating profile:', error);
+    if (error.status === 422 && error.error.errors) {
+      const errors = Object.values(error.error.errors).flat() as string[];
+      return throwError(() => new Error(errors[0] || 'Error al actualizar el perfil'));
+    }
+    return throwError(() => new Error('Error al actualizar el perfil'));
+  }
+
+  /**
    * Obtiene headers de autenticación para las peticiones HTTP
    */
   public getAuthHeaders(): { [header: string]: string } {

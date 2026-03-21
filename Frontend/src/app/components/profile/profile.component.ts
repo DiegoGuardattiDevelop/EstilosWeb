@@ -2,11 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.scss']
 })
@@ -15,6 +16,20 @@ export class ProfileComponent implements OnInit {
   loading: boolean = true;
   errorMessage: string = '';
   showError: boolean = false;
+  
+  // Edit mode
+  isEditing: boolean = false;
+  isSaving: boolean = false;
+  successMessage: string = '';
+  
+  // Edit form data
+  editForm = {
+    name: '',
+    phone: '',
+    address: '',
+    city: '',
+    province: ''
+  };
 
   constructor(private authService: AuthService, public router: Router) { }
 
@@ -70,6 +85,49 @@ export class ProfileComponent implements OnInit {
         console.error('Error al cerrar sesión', error);
         // Forzar redirección incluso si hay error
         this.router.navigate(['/']);
+      }
+    });
+  }
+
+  // Edit profile methods
+  startEdit() {
+    this.isEditing = true;
+    this.editForm = {
+      name: this.user?.name || '',
+      phone: this.user?.phone || '',
+      address: this.user?.address || '',
+      city: this.user?.city || '',
+      province: this.user?.province || ''
+    };
+  }
+
+  cancelEdit() {
+    this.isEditing = false;
+    this.successMessage = '';
+  }
+
+  saveProfile() {
+    this.isSaving = true;
+    this.successMessage = '';
+    this.showError = false;
+
+    this.authService.updateProfile(this.editForm).subscribe({
+      next: (response: any) => {
+        if (response.success) {
+          this.user = response.user;
+          // Recargar el perfil completo para asegurar datos actualizados
+          this.loadUserProfile();
+          this.isEditing = false;
+          this.successMessage = 'Perfil actualizado correctamente';
+          setTimeout(() => this.successMessage = '', 3000);
+        }
+        this.isSaving = false;
+      },
+      error: (error: any) => {
+        this.isSaving = false;
+        this.errorMessage = error.message || 'Error al actualizar el perfil';
+        this.showError = true;
+        setTimeout(() => this.showError = false, 5000);
       }
     });
   }

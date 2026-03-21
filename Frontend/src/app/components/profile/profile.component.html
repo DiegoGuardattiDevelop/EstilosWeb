@@ -20,8 +20,8 @@
       <p>Cargando información...</p>
     </div>
 
-    <!-- Información del perfil -->
-    <div *ngIf="!loading && user" class="profile-info">
+    <!-- Información del perfil - Modo visualización -->
+    <div *ngIf="!loading && user && !isEditing" class="profile-info">
       <div class="profile-avatar">
         <div class="avatar-circle">
           {{ getUserInitials() }}
@@ -52,6 +52,46 @@
 
         <div class="profile-detail">
           <div class="detail-icon">
+            <i class="fas fa-phone"></i>
+          </div>
+          <div class="detail-content">
+            <label>Teléfono</label>
+            <span>{{ user.phone || 'No registrado' }}</span>
+          </div>
+        </div>
+
+        <div class="profile-detail">
+          <div class="detail-icon">
+            <i class="fas fa-map-marker-alt"></i>
+          </div>
+          <div class="detail-content">
+            <label>Dirección</label>
+            <span>{{ user.address || 'No registrada' }}</span>
+          </div>
+        </div>
+
+        <div class="profile-detail">
+          <div class="detail-icon">
+            <i class="fas fa-city"></i>
+          </div>
+          <div class="detail-content">
+            <label>Ciudad</label>
+            <span>{{ user.city || 'No registrada' }}</span>
+          </div>
+        </div>
+
+        <div class="profile-detail">
+          <div class="detail-icon">
+            <i class="fas fa-map"></i>
+          </div>
+          <div class="detail-content">
+            <label>Provincia</label>
+            <span>{{ user.province || 'No registrada' }}</span>
+          </div>
+        </div>
+
+        <div class="profile-detail">
+          <div class="detail-icon">
             <i class="fas fa-calendar-alt"></i>
           </div>
           <div class="detail-content">
@@ -72,8 +112,65 @@
       </div>
     </div>
 
+    <!-- Formulario de edición -->
+    <div *ngIf="!loading && user && isEditing" class="profile-edit-form">
+      <div class="profile-avatar">
+        <div class="avatar-circle">
+          {{ getUserInitials() }}
+        </div>
+        <h3 class="user-name">Editar Perfil</h3>
+      </div>
+
+      <div class="edit-form">
+        <div class="form-group">
+          <label for="name">Nombre completo</label>
+          <input type="text" id="name" [(ngModel)]="editForm.name" class="form-input" placeholder="Tu nombre">
+        </div>
+
+        <div class="form-group">
+          <label for="phone">Teléfono</label>
+          <input type="tel" id="phone" [(ngModel)]="editForm.phone" class="form-input" placeholder="5493512345678">
+        </div>
+
+        <div class="form-group">
+          <label for="address">Dirección (calle y número)</label>
+          <input type="text" id="address" [(ngModel)]="editForm.address" class="form-input" placeholder="Calle 123">
+        </div>
+
+        <div class="form-group">
+          <label for="city">Ciudad</label>
+          <input type="text" id="city" [(ngModel)]="editForm.city" class="form-input" placeholder="Córdoba">
+        </div>
+
+        <div class="form-group">
+          <label for="province">Provincia</label>
+          <input type="text" id="province" [(ngModel)]="editForm.province" class="form-input" placeholder="Córdoba">
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="auth-button secondary" (click)="cancelEdit()" [disabled]="isSaving">
+            Cancelar
+          </button>
+          <button type="button" class="auth-button primary" (click)="saveProfile()" [disabled]="isSaving">
+            <span *ngIf="isSaving">Guardando...</span>
+            <span *ngIf="!isSaving">Guardar Cambios</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mensaje de éxito -->
+    <div *ngIf="successMessage" class="success-message show">
+      <i class="fas fa-check-circle"></i>
+      <span>{{ successMessage }}</span>
+    </div>
+
     <!-- Botones de acción -->
-    <div class="profile-actions" *ngIf="!loading && user">
+    <div class="profile-actions" *ngIf="!loading && user && !isEditing">
+      <button class="auth-button primary" (click)="startEdit()">
+        <i class="fas fa-edit"></i>
+        Editar Perfil
+      </button>
       <button class="auth-button secondary" (click)="goToHome()">
         <i class="fas fa-home"></i>
         Volver al Inicio

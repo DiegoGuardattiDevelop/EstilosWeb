@@ -251,19 +251,34 @@ export class CartComponent implements OnInit, OnDestroy {
     const currentUser = this.authService.getCurrentUser();
     const userName = currentUser?.name || 'Usuario Invitado';
     const userEmail = currentUser?.email || '';
+    const userPhone = currentUser?.phone || '';
+    const userAddress = currentUser?.address || '';
+    const userCity = currentUser?.city || '';
+    const userProvince = currentUser?.province || '';
     
     message += '   Nombre: ' + userName + '\n';
     if (userEmail) {
       message += '   Email: ' + userEmail + '\n';
     }
-    message += '   Teléfono: [COMPLETAR]\n';
-    message += '   Dirección: [COMPLETAR]\n\n';
+    if (userPhone) {
+      message += '   Telefono: ' + userPhone + '\n';
+    }
+    if (userAddress || userCity || userProvince) {
+      let fullAddress = '';
+      if (userAddress) fullAddress += userAddress;
+      if (userCity) fullAddress += (fullAddress ? ', ' : '') + userCity;
+      if (userProvince) fullAddress += (fullAddress ? ', ' : '') + userProvince;
+      message += '   Direccion: ' + fullAddress + '\n';
+    } else {
+      message += '   Direccion: [COMPLETAR]\n';
+    }
     
     message += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n';
     message += '*📌 INSTRUCCIONES:*\n';
-    message += '1. Confirme disponibilidad de productos\n';
-    message += '2. Indique método de pago (Efectivo/Transferencia/MercadoPago)\n';
-    message += '3. Coordine horario de retiro o entrega\n\n';
+    message += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+    message += '1. *Los productos tienen stock disponible*\n';
+    message += '2. *Orden sujeta a confirmacion de pago*\n';
+    message += '3. Coordine forma de pago y entrega\n\n';
     
     message += '💚 *Gracias por su compra!.*\n';
     message += '*Equipo EstilosWeb*';
@@ -275,8 +290,54 @@ export class CartComponent implements OnInit, OnDestroy {
     this.cartService.clearCart();
     this.failedImages.clear();
 
-    // Abrir WhatsApp
+    // Abrir WhatsApp con el vendedor
     const whatsappUrl = 'https://wa.me/' + environment.whatsappNumber + '?text=' + encodedMessage;
     window.open(whatsappUrl, '_blank');
+
+    // Enviar mensaje de confirmación al comprador (si está logeado y tiene teléfono)
+    if (currentUser?.phone) {
+      // Generar mensaje de confirmación para el comprador
+      let confirmMessage = '╔══════════════════════════════╗\n';
+      confirmMessage +=    '║   ✅ PEDIDO RECIBIDO - EstilosWeb   ║\n';
+      confirmMessage +=    '╚══════════════════════════════╝\n\n';
+      confirmMessage += 'Hola ' + (currentUser.name || 'Cliente') + '! \n\n';
+      confirmMessage += 'Tu pedido ha sido recibido correctamente.\n';
+      confirmMessage += 'N° de Pedido: ' + orderNumber + '\n\n';
+      
+      // Agregar dirección de entrega si está disponible
+      if (currentUser.address || currentUser.city || currentUser.province) {
+        let deliveryAddress = '';
+        if (currentUser.address) deliveryAddress += currentUser.address;
+        if (currentUser.city) deliveryAddress += (deliveryAddress ? ', ' : '') + currentUser.city;
+        if (currentUser.province) deliveryAddress += (deliveryAddress ? ', ' : '') + currentUser.province;
+        confirmMessage += '📍 *Direccion de entrega:* ' + deliveryAddress + '\n\n';
+      }
+      
+      confirmMessage += '💳 *DATOS DE PAGO:*\n';
+      confirmMessage += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+      confirmMessage += '🏦 *Transferencia:*\n';
+      confirmMessage += '   Banco: ' + environment.transferBank + '\n';
+      confirmMessage += '   Alias: ' + environment.transferAlias + '\n\n';
+      confirmMessage += '📱 *MercadoPago:*\n';
+      confirmMessage += '   ' + environment.mercadopagoLink + '\n\n';
+      
+      confirmMessage += '📦 *Instrucciones:*\n';
+      confirmMessage += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+      confirmMessage += '1. Realiza el pago usando una de las opciones\n';
+      confirmMessage += '2. Envía el comprobante por WhatsApp\n';
+      confirmMessage += '3. Tu pedido sera confirmado al recibir el pago\n';
+      confirmMessage += '4. Coordina el retiro de tu pedido\n\n';
+      
+      confirmMessage += '💚 *Gracias por tu compra!*\n';
+      confirmMessage += '*Equipo EstilosWeb*';
+
+      const encodedConfirmMessage = encodeURIComponent(confirmMessage);
+      const buyerWhatsappUrl = 'https://wa.me/' + currentUser.phone + '?text=' + encodedConfirmMessage;
+      
+      // Abrir mensaje de confirmación en una nueva pestaña
+      setTimeout(() => {
+        window.open(buyerWhatsappUrl, '_blank');
+      }, 1500); // Esperar 1.5 segundos para que se abra primero el chat con el vendedor
+    }
   }
 }

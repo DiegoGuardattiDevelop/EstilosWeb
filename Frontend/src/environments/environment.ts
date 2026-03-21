@@ -4,5 +4,10 @@ export const environment = {
     apiUrl: 'http://localhost:8000/api', // <-- ¡Esta es la URL de tu backend Laravel!
     stripePublishableKey: 'pk_test_51Q8Q2JHx7YKSBHqk1234567890abcdefghijklmnopqrstuvwxyz', // Clave de prueba de Stripe
     mercadopagoPublicKey: 'APP_USR-1234567890-12345678-abcdefghijklmnopqrstuvwxyz', // Reemplazar con tu clave pública de Mercado Pago
-    whatsappNumber: '5493572570342' // Número de WhatsApp para pedidos (incluir código de país, sin +)
+    whatsappNumber: '5493572570342', // Número de WhatsApp para pedidos (incluir código de país, sin +)
+    
+    // Datos de pago
+    transferAlias: 'ESTILOSWEB.COMPRA', // Alias para transferencia
+    transferBank: 'Banco Galicia', // Banco para transferencia
+    mercadopagoLink: 'https://mpago.la/xxxxxx' // Link de pago MercadoPago
 };
