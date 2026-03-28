@@ -66,11 +66,11 @@ export class CartComponent implements OnInit, OnDestroy {
   }
 
   goToShop(): void {
-    this.router.navigate(['/products']);
+    this.router.navigate(['/home']);
   }
 
   continueShopping(): void {
-    this.router.navigate(['/products']);
+    this.router.navigate(['/home']);
   }
 
   checkout(): void {
